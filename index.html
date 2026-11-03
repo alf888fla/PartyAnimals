@@ -12,7 +12,7 @@
 <style>
 /* Brand is dark-only by design: black ground, magenta + purple. No light theme. */
 :root{
-  --black:#000000; --magenta:#DF40C6; --purple:#8C51F6; --line:rgba(223,64,198,.25);
+  --black:#000000; --magenta:#DF40C6; --purple:#8C51F6; --yellow:#EEFF2B; --cyan:#19E6FF; --line:rgba(223,64,198,.25);
   --nav-h:84px;
   box-sizing:border-box;
   padding-top:env(safe-area-inset-top,0px);
@@ -75,13 +75,13 @@ h1,h2,h3,p{margin:0}
 /* list item */
 .li{display:flex;align-items:center;gap:16px;width:100%;min-height:72px;padding:12px 20px 12px 12px;border:1px solid var(--line);
   border-radius:36px;background:#000;color:var(--magenta);text-align:left;cursor:pointer}
-.li .ic{width:48px;height:48px;flex:none;border-radius:24px;background:#000;border:2px solid var(--purple);display:grid;place-items:center}
+.li .ic{width:48px;height:48px;flex:none;border-radius:24px;background:#000;border:2px solid var(--lv,var(--purple));display:grid;place-items:center}
 .li .tx{flex:1;min-width:0;display:flex;flex-direction:column;gap:4px}
 .li .tx b{font-size:15px;font-weight:800;letter-spacing:-.02em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .li .tx small{font-size:12px;color:var(--purple);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .li[aria-current="true"]{background:var(--magenta);border-color:var(--magenta);color:#000}
 .li[aria-current="true"] .ic{border-color:#000}
-.li[aria-current="true"] .tx small{color:#000}
+.li[aria-current="true"] .tx small,.li[aria-current="true"] .tx small span{color:#000!important}
 .li[aria-current="true"]:focus-visible{outline-color:#000}
 .li:disabled{opacity:.4;cursor:not-allowed}
 #vlist{display:flex;flex-direction:column;gap:12px}
@@ -104,6 +104,13 @@ h1,h2,h3,p{margin:0}
 .panel p.hi{color:var(--magenta)}
 .sw{display:flex;align-items:center;justify-content:space-between;gap:12px}
 .sw span{font-size:13px;line-height:1.3}
+.vis{display:flex;flex-direction:column;gap:8px}
+.vis button{display:block;width:100%;min-height:52px;padding:12px 16px;border:1px solid var(--line);border-radius:20px;background:#000;color:var(--magenta);font:inherit;text-align:left;cursor:pointer}
+.vis button b{display:block;font-size:13px;font-weight:800}
+.vis button small{display:block;margin-top:2px;font-size:12px;line-height:1.4;color:var(--purple)}
+.vis button[aria-pressed="true"]{border-color:var(--magenta);background:var(--magenta);color:#000}
+.vis button[aria-pressed="true"] small{color:#000}
+.vis button[aria-disabled="true"]{opacity:.6;cursor:progress}
 
 /* nav (design system) */
 .nav{position:absolute;left:50%;bottom:16px;transform:translateX(-50%);z-index:30;width:min(390px,calc(100% - 24px));height:var(--nav-h);
@@ -125,11 +132,14 @@ h1,h2,h3,p{margin:0}
 #world svg{position:absolute;left:0;top:0;pointer-events:none}
 .mk{position:absolute;width:44px;height:44px;padding:0;border:0;background:none;cursor:pointer;display:grid;place-items:center;
   transform:translate(-50%,-50%) scale(var(--inv));z-index:2}
-.mk i{display:block;width:22px;height:22px;border-radius:50%;border:3px solid var(--purple);background:#000;transition:background .4s,border-color .4s}
-.mk[data-l="1"] i,.mk[data-l="2"] i{background:var(--purple)}
-.mk[data-l="3"] i{background:var(--purple);border-color:var(--magenta)}
+.mk i{display:block;width:var(--d,10px);height:var(--d,10px);border-radius:50%;border:2px solid var(--purple);background:#000;transition:width .4s,height .4s,background .4s,border-color .4s}
+.mk[data-l="x"]{--d:10px}
+.mk[data-l="c"]{--d:8px}.mk[data-l="c"] i{opacity:.4}
+.mk[data-l="1"]{--d:14px}.mk[data-l="2"]{--d:17px}.mk[data-l="3"]{--d:20px}.mk[data-l="4"]{--d:24px}.mk[data-l="5"]{--d:28px}
+.mk[data-l="1"] i,.mk[data-l="2"] i{background:var(--cyan);border-color:var(--cyan)}
+.mk[data-l="3"] i{background:var(--yellow);border-color:var(--yellow)}
 .mk[data-l="4"] i,.mk[data-l="5"] i{background:var(--magenta);border-color:var(--magenta)}
-.mk[data-l="c"] i{border-style:dashed;opacity:.55}
+.map[data-layer="going"] .mk[data-l="1"] i,.map[data-layer="going"] .mk[data-l="2"] i,.map[data-layer="going"] .mk[data-l="3"] i,.map[data-layer="going"] .mk[data-l="4"] i,.map[data-layer="going"] .mk[data-l="5"] i{background:var(--yellow);border-color:var(--yellow)}
 .mk[aria-pressed="true"]{z-index:5}
 .mk[aria-pressed="true"] i{box-shadow:0 0 0 4px rgba(223,64,198,.35),0 0 0 8px #000,0 0 0 10px var(--magenta)}
 .mk.here i{animation:pulse 2.4s ease-in-out infinite}
@@ -139,32 +149,35 @@ h1,h2,h3,p{margin:0}
 .mk.nt .nm{bottom:calc(100% - 6px);left:50%;transform:translateX(-50%)}
 .mk.nr .nm{left:calc(100% - 6px);top:50%;transform:translateY(-50%)}
 .mk.nl .nm{right:calc(100% - 6px);top:50%;transform:translateY(-50%)}
-.cap{position:absolute;left:12px;top:60px;z-index:10;font-size:11px;color:var(--purple);max-width:55%;pointer-events:none;background:#000;padding:4px 10px;border-radius:14px}
-.lm{position:absolute;width:28px;height:28px;transform:translate(-50%,-50%) scale(var(--inv));z-index:1;pointer-events:none;visibility:hidden;color:var(--purple)}
+.legend{position:absolute;left:14px;top:112px;z-index:10;display:flex;gap:10px;font-size:10px;color:var(--purple);white-space:nowrap;pointer-events:none;background:rgba(0,0,0,.65);padding:3px 8px;border-radius:10px}
+.legend span{display:inline-flex;align-items:center;gap:4px}
+.legend i{display:inline-block;width:6px;height:6px;border-radius:50%;border:2px solid var(--purple);box-sizing:content-box}
+.cap{position:absolute;left:14px;top:136px;z-index:10;font-size:10px;color:var(--purple);white-space:nowrap;pointer-events:none;background:rgba(0,0,0,.65);padding:2px 8px;border-radius:10px}
+.lm{position:absolute;width:28px;height:28px;transform:translate(-50%,-50%) scale(var(--inv));z-index:1;pointer-events:none;visibility:hidden;color:var(--cyan)}
 .lm.on{visibility:visible}
-.lm .ic{display:grid;place-items:center;width:28px;height:28px;border-radius:50%;background:#000;border:2px solid var(--purple)}
+.lm .ic{display:grid;place-items:center;width:26px;height:26px;border-radius:50%;background:#000;opacity:.9}
 .lm .ic svg{width:16px;height:16px;display:block}
-.lm .tx{position:absolute;display:none;padding:3px 8px;border-radius:999px;background:#000;border:1px solid var(--line);font-size:10px;font-weight:800;white-space:nowrap}
-.lm.on .tx{display:block}
+.lm .tx{position:absolute;display:none;padding:3px 8px;border-radius:999px;background:#000;border:1px solid rgba(25,230,255,.35);font-size:10px;font-weight:800;white-space:nowrap}
+.map.labels .lm.on .tx{display:block}
 .lm.r .tx{left:100%;margin-left:6px;top:50%;transform:translateY(-50%)}
 .lm.l .tx{right:100%;margin-right:6px;top:50%;transform:translateY(-50%)}
 .lm.b .tx{top:100%;margin-top:5px;left:50%;transform:translateX(-50%)}
 .lm.t .tx{bottom:100%;margin-bottom:5px;left:50%;transform:translateX(-50%)}
 .lm.nolabel .tx{display:none}
-.area{position:absolute;transform:translate(-50%,-50%) scale(var(--inv));z-index:1;pointer-events:none;visibility:hidden;color:var(--purple);opacity:.6;font-size:12px;font-weight:800;letter-spacing:.04em;white-space:nowrap}
+.area{position:absolute;transform:translate(-50%,-50%) scale(var(--inv));z-index:1;pointer-events:none;visibility:hidden;color:var(--purple);opacity:.6;font-size:11px;font-weight:800;letter-spacing:.04em;white-space:nowrap}
 .area.on{visibility:visible}
 .ctls{position:absolute;right:12px;top:60px;z-index:10;display:flex;flex-direction:column;gap:8px}
 .ctls button{width:44px;height:44px;border-radius:50%;border:2px solid var(--magenta);background:#000;color:var(--magenta);font-size:20px;font-weight:800;cursor:pointer;padding:0;display:grid;place-items:center}
 .ctls button:active{border-color:var(--purple);color:var(--purple)}
-.layer{position:absolute;left:12px;top:104px;z-index:10;display:flex;gap:6px}
-.layer button{height:40px;padding:0 16px;border-radius:999px;border:2px solid var(--purple);background:#000;color:var(--purple);font-size:11px;font-weight:800;cursor:pointer;white-space:nowrap}
-.layer button[aria-pressed="true"]{background:var(--magenta);border-color:var(--magenta);color:#000}
+.layer{position:absolute;left:12px;top:60px;z-index:10;display:inline-flex;padding:3px;border:2px solid var(--purple);border-radius:999px;background:#000}
+.layer button{height:34px;padding:0 14px;border-radius:999px;border:0;background:transparent;color:var(--purple);font-size:11px;font-weight:800;cursor:pointer;white-space:nowrap}
+.layer button[aria-pressed="true"]{background:var(--magenta);color:#000}
 #heat circle{transition:r .6s ease}
 .dir{border:2px solid var(--magenta);border-radius:28px;background:#000;padding:12px 16px;display:flex;flex-direction:column;gap:6px}
 .dir .top{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:12px;font-weight:800}
 .dir .x2{width:36px;height:36px;border-radius:50%;border:2px solid var(--magenta);background:#000;color:var(--magenta);font-size:18px;font-weight:800;cursor:pointer;padding:0;display:grid;place-items:center}
 .dir .tm{display:flex;align-items:center;justify-content:space-between;gap:8px}
-.dir .tm b{font-size:20px;font-weight:800;letter-spacing:-.03em}
+.dir .tm b{font-size:20px;font-weight:800;letter-spacing:-.03em;color:var(--yellow)}
 .dir input[type=range]{width:100%;height:28px;accent-color:#DF40C6;margin:0}
 .dir .chips{display:flex;gap:6px}
 .dir .chips button{flex:1;min-width:0;height:36px;padding:0 4px;border-radius:999px;border:2px solid var(--purple);background:#000;color:var(--purple);font-size:11px;font-weight:800;cursor:pointer}
@@ -181,7 +194,7 @@ h1,h2,h3,p{margin:0}
 .slot{position:absolute;left:12px;right:12px;bottom:calc(var(--nav-h) + 28px);z-index:25;display:flex;flex-direction:column;gap:12px}
 .banner{border:1px solid var(--magenta);border-radius:28px;background:#000;padding:16px 20px;display:flex;flex-direction:column;gap:12px;align-items:flex-start}
 .banner p{font-size:12px;line-height:1.5}
-.offline{position:absolute;left:50%;top:60px;transform:translateX(-50%);z-index:26;max-width:calc(100% - 24px)}
+.offline{position:absolute;left:12px;top:160px;z-index:26;max-width:calc(100% - 80px)}
 
 /* dialogs + toast */
 .scrim{position:fixed;inset:0;z-index:100;background:rgba(0,0,0,.78);display:flex;align-items:flex-end;justify-content:center;
@@ -198,7 +211,7 @@ h1,h2,h3,p{margin:0}
 .dlg .a{display:flex;flex-direction:column;gap:10px}
 .dlg .a .btn{width:100%}
 .dlg .pick{display:flex;flex-direction:column;gap:10px}
-.toast{position:fixed;left:50%;top:calc(64px + env(safe-area-inset-top,0px));transform:translateX(-50%);z-index:90;
+.toast{position:fixed;left:50%;bottom:calc(var(--nav-h) + 28px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:90;
   max-width:min(440px,calc(100% - 24px));padding:12px 20px;border-radius:999px;background:#000;border:2px solid var(--magenta);
   color:var(--magenta);font-size:12px;font-weight:800;text-align:center;opacity:0;pointer-events:none;transition:opacity .25s}
 .toast.on{opacity:1}
@@ -208,8 +221,30 @@ h1,h2,h3,p{margin:0}
 .gate p{font-size:13px;line-height:1.55;color:var(--purple)}
 .gate .btns{display:flex;flex-direction:column;gap:10px;width:100%}
 .gate .btns .btn{width:100%}
+.gate form.in{gap:20px}
+.gate .ah{display:flex;flex-direction:column;gap:10px}
+.gate .authf{width:100%}
+.gate .authf .field:last-child{margin-bottom:0}
+.gate .err{font-size:12px;line-height:1.5;color:var(--yellow);font-weight:800}
+.gate .links{display:flex;gap:20px;flex-wrap:wrap}
+.lnk{background:none;border:0;padding:6px 0;color:var(--purple);font-size:12px;font-weight:800;cursor:pointer;text-decoration:underline;text-underline-offset:3px}
 .spin{width:28px;height:28px;border-radius:50%;border:3px solid var(--purple);border-top-color:var(--magenta);animation:sp 1s linear infinite}
 @keyframes sp{to{transform:rotate(360deg)}}
+/* profile + friends (PARS-46, PARS-47) */
+.panel .field{margin-bottom:0}
+.panel form{display:flex;flex-direction:column;gap:16px}
+.seg{display:flex;gap:8px;flex-wrap:wrap}
+.seg .btn.small{min-width:0}
+.plist{display:flex;flex-direction:column;gap:10px}
+.prow{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:56px;padding:10px 12px 10px 20px;border:1px solid var(--line);border-radius:28px}
+.prow .tx{min-width:0;display:flex;flex-direction:column;gap:6px}
+.prow b{font-size:14px;font-weight:800;letter-spacing:-.02em;overflow-wrap:anywhere}
+.prow small{font-size:12px;color:var(--purple);overflow-wrap:anywhere}
+.prow .acts{display:flex;gap:8px;flex:none;flex-wrap:wrap;justify-content:flex-end}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip{display:inline-flex;align-items:center;min-height:28px;padding:4px 12px;border-radius:999px;border:1px solid var(--purple);color:var(--magenta);font-size:11px;font-weight:800;overflow-wrap:anywhere}
+.chip i{font-style:normal;color:var(--purple);font-weight:400;margin-right:6px}
+.panel .err,.dlg .err{font-size:12px;line-height:1.5;color:var(--yellow);font-weight:800}
 @media (prefers-reduced-motion:reduce){
   *,*::before,*::after{animation:none!important;transition:none!important}
 }
@@ -227,6 +262,7 @@ h1,h2,h3,p{margin:0}
   <section class="screen" id="screen-map" aria-label="Map">
     <div class="map" id="map">
       <div id="world"></div>
+      <div class="legend" id="legend" aria-label="Map legend"></div>
       <div class="cap" id="cap"></div>
       <div class="layer" role="group" aria-label="Map layer"><button type="button" data-layer="live" aria-pressed="true">live now</button><button type="button" data-layer="going" aria-pressed="false">going tonight</button></div>
       <div class="ctls">
@@ -257,15 +293,12 @@ h1,h2,h3,p{margin:0}
 
   <section class="screen" id="screen-friends" aria-label="Friends" hidden>
     <h1>Friends</h1>
-    <div class="card">
-      <div class="row"><span class="badge">coming soon</span></div>
-      <h3>see where your crew is going</h3>
-      <p class="sub">this test is about the live crowd map. friends comes next, once the map proves itself.</p>
-    </div>
+    <div id="friends"></div>
   </section>
 
   <section class="screen" id="screen-me" aria-label="Me" hidden>
     <h1>Me</h1>
+    <div id="me46"></div>
     <div id="me"></div>
   </section>
 
@@ -282,14 +315,22 @@ h1,h2,h3,p{margin:0}
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 <div id="gate"></div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 (() => {
 'use strict';
 
 /* ============================================================
    CONFIG
+   Paste your Supabase project values here (Project Settings > API).
+   Leave them empty to run the local demo: nothing leaves the device.
+   The anon / publishable key is safe in the browser: access is enforced by RLS (see schema.sql).
    ============================================================ */
-const BACKEND_LOCAL = true;       // true = nothing leaves this device. Swap Api (below) for Supabase to go live.
+const SUPABASE_URL = 'https://ahovlpxzkzcwuyotfolm.supabase.co';          // e.g. 'https://abcd1234.supabase.co'
+const SUPABASE_ANON_KEY = 'sb_publishable_WCEM00FDvvisRiPhSQqz0A_PDcOZLdm';     // the "anon public" key (or "sb_publishable_..." key)
+let sb = null;
+try { if (SUPABASE_URL && SUPABASE_ANON_KEY && window.supabase) sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY); } catch (e) { sb = null; }
+const BACKEND_LOCAL = !sb;        // true = nothing leaves this device
 const N = 5;                      // k-anonymity: no counts/levels below N people
 const WINDOW_MIN = 45;            // crowd = pings in the last 45 min
 const PING_TTL_MIN = 120;         // pings deleted after 2 h
@@ -325,11 +366,12 @@ const VENUES = [
   {id:'barcosound',name:'Barco Sound House',barrio:'malasaña',genre:'live music · club',type:'club', lat:40.4233, lng:-3.7022, r:50, pop:45, entry:null, hours:[18,30],   nights:[3,4,5,6,0], verified:false}
 ];
 const LANDMARKS = [
-  {n:'sol',lat:40.4168,lng:-3.7038,ic:'clock'},{n:'callao',lat:40.4201,lng:-3.7059,ic:'screen'},
-  {n:'plaza de españa',lat:40.4232,lng:-3.7121,ic:'monument'},{n:'tribunal',lat:40.4268,lng:-3.7019,ic:'metro'},
-  {n:'cibeles',lat:40.4193,lng:-3.6932,ic:'fountain'},{n:'atocha station',lat:40.4065,lng:-3.6895,ic:'train'},
-  {n:'palacio real',lat:40.4180,lng:-3.7143,ic:'crown'},{n:'plaza mayor',lat:40.4155,lng:-3.7074,ic:'plaza'},
-  {n:'puerta de alcalá',lat:40.4200,lng:-3.6888,ic:'arch'},{n:'retiro park',lat:40.4150,lng:-3.6830,ic:'tree'}
+  {n:'puerta del sol',lat:40.4168,lng:-3.7038,ic:'clock'},
+  {n:'palacio real',lat:40.4180,lng:-3.7143,ic:'crown'},
+  {n:'plaza de españa',lat:40.4232,lng:-3.7121,ic:'monument'},
+  {n:'cibeles',lat:40.4193,lng:-3.6932,ic:'fountain'},
+  {n:'retiro park',lat:40.4150,lng:-3.6830,ic:'tree'},
+  {n:'atocha station',lat:40.4065,lng:-3.6895,ic:'train'}
 ];
 const BARRIOS = [ // approximate area labels
   {n:'malasaña',lat:40.4284,lng:-3.7066},{n:'chueca',lat:40.4222,lng:-3.6948},{n:'lavapiés',lat:40.4085,lng:-3.7025},
@@ -354,7 +396,6 @@ const ROADS = [ // schematic, approximate
   [[40.4168,-3.7038],[40.4193,-3.6932]],                                      // alcalá
   [[40.4168,-3.7038],[40.4125,-3.6985],[40.4065,-3.6895]],                    // atocha
   [[40.4193,-3.6932],[40.4130,-3.6915],[40.4065,-3.6895]],                    // prado
-  [[40.4208,-3.7015],[40.4268,-3.7019]],                                      // fuencarral
   [[40.4460,-3.6905],[40.4300,-3.6895],[40.4193,-3.6932]]                     // castellana
 ];
 
@@ -401,7 +442,8 @@ const S = {
   going: store.get('going', {night:'', ids:{}}),
   pings: store.get('pings', []),          // {venueId,ts,source,sent}
   simH: store.get('simH', 26), layer: 'live', dir: false, fake: store.get('fake', {}), recaps: store.get('recaps', []),
-  selected: null, query: '', crowd: new Map(), lastUpdate: 0, online: navigator.onLine !== false, refreshFailed: false
+  selected: null, query: '', crowd: new Map(), lastUpdate: 0, online: navigator.onLine !== false, refreshFailed: false,
+  user: null, guest: store.get('guest', false), liveFailed: false, vis: {uid: null}
 };
 const save = k => store.set(k, S[k]);
 
@@ -425,14 +467,26 @@ function madrid() {
 }
 
 /* ============================================================
-   DATA LAYER — the seam for Supabase.
-   Live version: submitPing = insert (RLS: insert-only), getCrowd = read the
-   `crowd` view (venues with >= N active users). Raw pings are never readable.
+   DATA LAYER — local demo or Supabase.
+   Live: submitPing = insert into `pings` (RLS: insert-only), getCrowd = rpc
+   `get_crowd` (only venues with >= N people get a number). Raw pings are never readable.
    ============================================================ */
+async function fetchLive() {
+  if (!sb) return null;
+  try {
+    const {data, error} = await sb.rpc('get_crowd'); if (error) throw error;
+    S.liveFailed = false; return new Map((data || []).map(r => [r.venue_id, r]));
+  } catch (e) {
+    console.warn('get_crowd failed', e);
+    if (!S.liveFailed) toast("couldn't reach the server · showing demo only");
+    S.liveFailed = true; return new Map();
+  }
+}
 const Api = {
   async getCrowd() {
     const now = madrid(), out = new Map(), mult = NIGHT_MULT[now.nightDow];
     const bucket = Math.floor(Date.now() / 120000), gb = Math.floor(Date.now() / 600000), cutoff = Date.now() - WINDOW_MIN * 60000;
+    const live = await fetchLive();
     for (const v of VENUES) {
       const [o, c] = v.hours;
       const open = now.hs >= o && now.hs <= c && !(v.type === 'club' && mult < 0.4) && (!v.nights || v.nights.includes(now.nightDow));
@@ -442,20 +496,45 @@ const Api = {
         const g = Math.exp(-0.5 * ((now.hs - center) / sigma) ** 2);
         count = v.pop * mult * g * (0.88 + 0.24 * rnd(hash(v.id) + bucket));
       }
-      if (open) count += S.pings.filter(p => p.venueId === v.id && p.ts >= cutoff).reduce((a, p) => a + (p.source === 'geo' ? 1 : 0.5), 0);
+      const lv = live ? (live.get(v.id) || {}) : null;
+      if (open) count += lv ? (lv.crowd || 0) : S.pings.filter(p => p.venueId === v.id && p.ts >= cutoff).reduce((a, p) => a + (p.source === 'geo' ? 1 : 0.5), 0);
       if (open) count += (S.fake[v.id] || []).filter(f => f.ts >= cutoff).reduce((a, f) => a + f.n, 0);
       let going = 0;
       if (S.demo) going = Math.round(v.pop * mult * 0.5 * (0.9 + 0.2 * rnd(hash(v.id + 'g') + gb)));
-      if (S.going.night === now.nightKey && S.going.ids[v.id]) going += 1;
+      if (lv) going += lv.going || 0;
+      else if (S.going.night === now.nightKey && S.going.ids[v.id]) going += 1;
       out.set(v.id, {open, count: Math.floor(count), going});
     }
     return out;
   },
-  async submitPing() { if (navigator.onLine === false) throw new Error('offline'); return true; }
+  async submitPing(p) {
+    if (navigator.onLine === false) throw new Error('offline');
+    if (!sb) return true;
+    if (!S.user) throw new Error('auth');
+    const {error} = await sb.from('pings').insert({venue_id: p.venueId, source: p.source});
+    if (error) throw error;
+    return true;
+  },
+  async setGoing(id, on) {
+    if (!sb || !S.user) return;
+    const q = on ? sb.from('going').insert({venue_id: id}) : sb.from('going').delete().eq('venue_id', id).eq('user_id', S.user.id);
+    const {error} = await q;
+    if (error && error.code !== '23505') throw error; // 23505 = already marked as going
+  }
 };
 
 const levelOf = c => c < N ? null : c < 10 ? 1 : c < 20 ? 2 : c < 35 ? 3 : c < 60 ? 4 : 5;
 const LABELS = [null, 'quiet', 'warming up', 'filling up', 'busy now', 'packed'];
+const HUE = {1:'var(--cyan)', 2:'var(--cyan)', 3:'var(--yellow)', 4:'var(--magenta)', 5:'var(--magenta)'};
+const HEXHUE = {cyan:'#19E6FF', yellow:'#EEFF2B', magenta:'#DF40C6'};
+const hueOf = L => L ? HUE[L] : 'var(--purple)';
+const hexOf = (L, layer) => layer === 'going' ? HEXHUE.yellow : L ? (L <= 2 ? HEXHUE.cyan : L === 3 ? HEXHUE.yellow : HEXHUE.magenta) : '#8C51F6';
+function updateLegend() {
+  const lg = $('#legend'); if (!lg) return;
+  lg.innerHTML = S.layer === 'going'
+    ? '<span><i style="background:#EEFF2B;border-color:#EEFF2B"></i>going · bigger = more</span><span><i></i>few</span>'
+    : '<span><i style="background:#19E6FF;border-color:#19E6FF"></i>quiet</span><span><i style="background:#EEFF2B;border-color:#EEFF2B"></i>filling</span><span><i style="background:#DF40C6;border-color:#DF40C6"></i>busy</span><span><i></i>no signal</span>';
+}
 function mapStatus(v) {
   if (S.layer === 'going') { const c = S.crowd.get(v.id), L = c ? levelOf(c.going) : null; return {level: L, key: L ? String(L) : 'x', label: L ? 'going: ' + LABELS[L] : 'few going'}; }
   return status(v);
@@ -485,9 +564,14 @@ const ICONS = {
    TOAST / DIALOG
    ============================================================ */
 let toastT;
+function placeToast() {
+  const sl = $('#slot'), extra = (S.tab === 'map' && sl && sl.offsetHeight) ? sl.offsetHeight + 12 : 0;
+  $('#toast').style.bottom = `calc(var(--nav-h) + 28px + ${extra}px + env(safe-area-inset-bottom,0px))`;
+}
 function toast(msg) {
   const t = $('#toast'); t.textContent = msg; t.classList.add('on');
-  clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('on'), 4200);
+  placeToast();
+  clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('on'), 3200);
 }
 let dlg = null;
 function dialog({title, build, actions = [], dismissible = true}) {
@@ -545,6 +629,8 @@ function setTab(t) {
   $('#nav').setAttribute('aria-label', 'Main, ' + t + ' selected');
   if (t === 'map') requestAnimationFrame(() => { sizeMap(); renderSlot(); });
   if (t === 'me') renderMe();
+  if (t === 'me') renderProfile();         // PARS-46
+  if (t === 'friends') renderFriends();    // PARS-47
   if (t === 'team') { S.teamSel = null; renderTeam(); } else $('#tmsg').hidden = true;
   if (t === 'venues') renderList(true);
   const sc = $('#screen-' + t); if (sc && t !== 'map') sc.scrollTop = 0;
@@ -566,10 +652,10 @@ const mk = {}, lmEls = [], areaEls = [], vPos = {};
 
 function buildMap() {
   world.style.width = WW + 'px'; world.style.height = WH + 'px';
-  const roads = ROADS.map(r => `<polyline points="${r.map(([a, b]) => { const p = proj(a, b); return p.x.toFixed(1) + ',' + p.y.toFixed(1); }).join(' ')}" fill="none" stroke="#8C51F6" stroke-opacity=".35" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>`).join('');
-  const heat = VENUES.map(v => { const p = proj(v.lat, v.lng); return `<circle data-h="${v.id}" cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="0" fill="#8C51F6" fill-opacity=".4"/>`; }).join('');
-  const core = VENUES.map(v => { const p = proj(v.lat, v.lng); return `<circle data-c="${v.id}" cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="0" fill="#DF40C6" fill-opacity=".6"/>`; }).join('');
-  const parks = PARKS.map(k => { const a = proj(k.lat1, k.lng1), b = proj(k.lat2, k.lng2); return `<rect x="${a.x.toFixed(1)}" y="${a.y.toFixed(1)}" width="${(b.x - a.x).toFixed(1)}" height="${(b.y - a.y).toFixed(1)}" rx="24" fill="#8C51F6" fill-opacity=".14"/>`; }).join('');
+  const roads = ROADS.map(r => `<polyline points="${r.map(([a, b]) => { const p = proj(a, b); return p.x.toFixed(1) + ',' + p.y.toFixed(1); }).join(' ')}" fill="none" stroke="#8C51F6" stroke-opacity=".16" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>`).join('');
+  const heat = VENUES.map(v => { const p = proj(v.lat, v.lng); return `<circle data-h="${v.id}" cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="0" fill="#8C51F6" fill-opacity=".28"/>`; }).join('');
+  const core = VENUES.map(v => { const p = proj(v.lat, v.lng); return `<circle data-c="${v.id}" cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="0" fill="#DF40C6" fill-opacity=".5"/>`; }).join('');
+  const parks = PARKS.map(k => { const a = proj(k.lat1, k.lng1), b = proj(k.lat2, k.lng2); return `<rect x="${a.x.toFixed(1)}" y="${a.y.toFixed(1)}" width="${(b.x - a.x).toFixed(1)}" height="${(b.y - a.y).toFixed(1)}" rx="24" fill="#19E6FF" fill-opacity=".07"/>`; }).join('');
   world.innerHTML = `<svg width="${WW}" height="${WH}" height="${WH}" viewBox="0 0 ${WW} ${WH}" aria-hidden="true"><defs><filter id="blur" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="14"/></filter></defs>${parks}${roads}<g filter="url(#blur)" id="heat">${heat}${core}</g></svg>`;
   BARRIOS.forEach(l => { const p = proj(l.lat, l.lng), d = document.createElement('div'); d.className = 'area'; d.textContent = l.n; d.style.left = p.x + 'px'; d.style.top = p.y + 'px'; world.appendChild(d); areaEls.push({el: d, p}); });
   LANDMARKS.forEach(l => { const p = proj(l.lat, l.lng), d = document.createElement('div'); d.className = 'lm'; d.innerHTML = `<span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${LM_ICONS[l.ic] || ''}</svg></span><span class="tx">${esc(l.n)}</span>`; d.style.left = p.x + 'px'; d.style.top = p.y + 'px'; world.appendChild(d); lmEls.push({el: d, p}); });
@@ -606,7 +692,9 @@ function layoutLabels() {
     el.classList.remove('on', 'r', 'l', 'b', 't', 'nolabel');
     if (!free(icon)) return;                       // never sit on a venue or another landmark
     rects.push(icon);
-    const tx = el.querySelector('.tx'); el.classList.add('on'); el.style.visibility = 'hidden'; tx.style.display = 'block';
+    el.classList.add('on');
+    if (!mapEl.classList.contains('labels')) { el.classList.add('nolabel'); return; }
+    const tx = el.querySelector('.tx'); el.style.visibility = 'hidden'; tx.style.display = 'block';
     const w = tx.offsetWidth + 8, h = 24;
     const opts = [['r', cx + 14 + 8 + w / 2, cy], ['l', cx - 14 - 8 - w / 2, cy], ['b', cx, cy + 14 + 8 + h / 2], ['t', cx, cy - 14 - 8 - h / 2]];
     let placed = false;
@@ -615,7 +703,7 @@ function layoutLabels() {
     if (!placed) el.classList.add('nolabel', 'r');
   });
   areaEls.forEach(({el, p}) => {
-    const cx = p.x * s, cy = p.y * s; el.classList.remove('on'); el.style.visibility = 'hidden';
+    const cx = p.x * s, cy = p.y * s; el.classList.remove('on'); if (s >= view.s0 * 2.6) return; el.style.visibility = 'hidden';
     const w = el.offsetWidth + 10, h = 20;
     for (const [dx, dy] of [[0, 0], [0, -22], [0, 22], [-w * 0.6, 0], [w * 0.6, 0]]) {
       const r = R(cx + dx, cy + dy, w, h); if (free(r)) { rects.push(r); el.style.left = (p.x + dx / s) + 'px'; el.style.top = (p.y + dy / s) + 'px'; el.classList.add('on'); break; }
@@ -713,11 +801,13 @@ function updateMap() {
     b.setAttribute('aria-label', `${v.name}, ${st.label}`);
     b.classList.toggle('here', !!(S.party && S.party.venueId === v.id));
     const L = st.level || 0, hp = $(`[data-h="${v.id}"]`), hc = $(`[data-c="${v.id}"]`);
-    if (hp) hp.setAttribute('r', L ? (70 + L * 40) * PPM : 0);
-    if (hc) hc.setAttribute('r', L ? (30 + L * 20) * PPM : 0);
+    const hx = hexOf(L, S.layer);
+    if (hp) { hp.setAttribute('r', L ? (70 + L * 40) * PPM : 0); hp.setAttribute('fill', hx); }
+    if (hc) { hc.setAttribute('r', L ? (30 + L * 20) * PPM : 0); hc.setAttribute('fill', hx); }
     if (!L) empty.push(v);
   });
-  $('#cap').textContent = 'schematic map · not to scale' + (S.lastUpdate ? ' · updated ' + new Date(S.lastUpdate).toLocaleTimeString('en-GB', {timeZone:'Europe/Madrid', hour:'2-digit', minute:'2-digit'}) : '');
+  mapEl.dataset.layer = S.layer; updateLegend();
+  $('#cap').textContent = 'schematic map' + (S.lastUpdate ? ' · updated ' + new Date(S.lastUpdate).toLocaleTimeString('en-GB', {timeZone:'Europe/Madrid', hour:'2-digit', minute:'2-digit'}) : '');
 }
 
 /* ============================================================
@@ -733,7 +823,7 @@ function renderSlot() {
   if (S.dir) {
     const dkey = 'dir|' + S.selected;
     if (dkey === slotKey) { updateDirector(); return; }
-    slotKey = dkey; slot.innerHTML = directorHTML(); bindDirector(); updateDirector(); return;
+    slotKey = dkey; slot.innerHTML = directorHTML(); bindDirector(); updateDirector(); placeToast(); return;
   }
   let html = '', key;
   if (S.selected) {
@@ -748,7 +838,7 @@ function renderSlot() {
     const goingTxt = c.going >= N ? `${c.going} going tonight` : 'few going so far';
     html = `<article class="card" aria-label="${esc(v.name)}">
       <button type="button" class="x on-purple" id="cardX" aria-label="Close">&times;</button>
-      <div class="row"><span class="badge">${esc(here ? "you're here" : st.label)}</span><span style="font-size:12px">${esc(entry)}</span></div>
+      <div class="row"><span class="badge" style="color:${here ? 'var(--magenta)' : hueOf(st.level)}">${esc(here ? "you're here" : st.label)}</span><span style="font-size:12px">${esc(entry)}</span></div>
       <div><h3>${esc(v.name)}</h3><div class="sub">${esc(v.barrio)} · ${esc(v.genre)}</div></div>
       <div class="meta">${crowdDots(st.level || 0)}<span>${esc(crowdTxt)}</span></div>
       <div class="meta"><span>${esc(goingTxt)}</span></div>
@@ -761,7 +851,7 @@ function renderSlot() {
     if (key === slotKey) return;
     if (e) html = `<div class="banner" role="status"><p>${esc(e.text)}</p>${e.btn ? `<button type="button" class="btn sec small" id="bannerBtn">${esc(e.btn)}</button>` : ''}</div>`;
   }
-  slotKey = key; slot.innerHTML = html;
+  slotKey = key; slot.innerHTML = html; placeToast();
   const x = $('#cardX'); if (x) x.addEventListener('click', () => selectVenue(null));
   const g = $('#goBtn'); if (g) g.addEventListener('click', () => toggleGoing(S.selected));
   const bb = $('#bannerBtn'); if (bb) bb.addEventListener('click', () => { const e = emptyState(); if (e && e.act) e.act(); });
@@ -833,9 +923,13 @@ function recapDialog() {
     actions: [['yes', 'yes, it did'], ['no', "no, i'd have gone anyway"], ['unsure', 'not sure']].map(([k, label]) => ({label, kind: 'pri', onClick: () => { S.recaps.push({ts: Date.now(), a: k}); save('recaps'); toast('thanks · noted'); if (S.tab === 'me') renderMe(); }})).concat([{label: 'skip', kind: 'sec'}])});
 }
 async function toggleGoing(id) {
+  if (requireAuth('saying where you are going tonight needs an account. your name never shows on the map.')) return;
   const n = madrid();
   if (S.going.night !== n.nightKey) S.going = {night: n.nightKey, ids: {}};
-  if (S.going.ids[id]) delete S.going.ids[id]; else S.going.ids[id] = true;
+  const on = !S.going.ids[id];
+  if (on) S.going.ids[id] = true; else delete S.going.ids[id];
+  try { await Api.setGoing(id, on); }
+  catch (e) { if (on) delete S.going.ids[id]; else S.going.ids[id] = true; toast("couldn't save · try again"); slotKey = ''; renderSlot(); return; }
   save('going'); await refresh();
   toast(S.going.ids[id] ? "you're going · counts toward tonight's map" : 'removed');
 }
@@ -852,7 +946,7 @@ function renderList(force) {
   if (!force && key === listKey) return; listKey = key;
   const ae = document.activeElement, keepId = ae && ae.dataset && ae.dataset.id && $('#vlist').contains(ae) ? ae.dataset.id : null;
   $('#vlist').innerHTML = items.map(v => { const st = status(v), sel = S.selected === v.id;
-    return `<li><button type="button" class="li" data-id="${v.id}" ${sel ? 'aria-current="true"' : ''}><span class="ic">${paw(28, 22)}</span><span class="tx"><b>${esc(v.name)}</b><small>${esc(v.barrio)} · ${esc(st.label)}</small></span>${chev}</button></li>`; }).join('');
+    return `<li><button type="button" class="li" data-id="${v.id}" style="--lv:${hueOf(st.level)}" ${sel ? 'aria-current="true"' : ''}><span class="ic">${paw(28, 22)}</span><span class="tx"><b>${esc(v.name)}</b><small>${esc(v.barrio)} · <span style="color:${hueOf(st.level)}">${esc(st.label)}</span></small></span>${chev}</button></li>`; }).join('');
   const em = $('#vempty'); em.hidden = items.length > 0;
   if (!items.length) em.textContent = `nothing matches "${S.query.trim()}". try a barrio like malasaña or a genre like house.`;
   if (keepId) { const n = $(`#vlist [data-id="${keepId}"]`); if (n) n.focus(); }
@@ -865,9 +959,58 @@ $('#qclr').addEventListener('click', () => { S.query = ''; $('#q').value = ''; $
    ME
    ============================================================ */
 function sw(id, label, on) { return `<div class="sw"><span>${label}</span><button type="button" class="btn ${on ? '' : 'sec'} small" id="${id}" role="switch" aria-checked="${on}" style="min-width:76px">${on ? 'on' : 'off'}</button></div>`; }
+/* PARS-45: who can see my profile. Saved in profiles.visibility; the "profiles read" policy in schema.sql enforces it. */
+const VIS = [
+  ['public', 'everyone', 'anyone with a party animals account can see your profile.', 'anyone with an account can see your profile'],
+  ['friends', 'friends only', 'only people you have accepted as friends can see your profile.', 'only friends can see your profile'],
+  ['private', 'only me', 'nobody else can see your profile.', 'only you can see your profile']
+];
+function privacyPanel() {
+  if (!sb || !S.user) return '';
+  const p = S.vis;
+  const body = p.state === 'error'
+    ? `<p class="hi">couldn't load your privacy setting.</p><button type="button" class="btn sec" id="visRetry">try again</button>`
+    : p.state === 'loading'
+      ? '<p class="hi">loading your privacy setting</p>'
+      : `<div class="vis" id="visOpts" role="group" aria-label="Who can see your profile">${VIS.map(([k, t, d]) => `<button type="button" id="vis-${k}" data-vis="${k}" aria-pressed="${p.value === k}"${p.saving ? ' aria-disabled="true"' : ''}><b>${t}</b><small>${d}</small></button>`).join('')}</div>`;
+  return `<div class="panel"><h2>Privacy</h2>
+      <p>choose who can see your name and username.</p>
+      ${body}
+      <p>your check-ins and plans are never shown to anyone. they only count anonymously in crowd numbers.</p>
+    </div>`;
+}
+async function loadVisibility(force) {
+  if (!sb || !S.user) return;
+  const uid = S.user.id;
+  if (!force && S.vis.uid === uid) return;
+  const p = S.vis = {uid, state: 'loading', value: null, saving: false};
+  let row = null;
+  try { const {data, error} = await sb.from('profiles').select('visibility').eq('id', uid).maybeSingle(); if (!error) row = data; } catch (e) {}
+  if (S.vis !== p) return;                // logged out or switched account meanwhile
+  p.state = row ? 'ready' : 'error'; p.value = row ? row.visibility : null;
+  if (S.tab === 'me') renderMe();
+}
+async function setVisibility(value) {
+  const p = S.vis;
+  if (p.state !== 'ready' || p.saving || p.value === value) return;
+  if (navigator.onLine === false) return toast("you're offline · try again when you're back");
+  p.saving = true; renderMe();
+  let ok = false;
+  // .select().single() fails if no row changed, so a blocked update can't look like a success
+  try { const {data, error} = await sb.from('profiles').update({visibility: value}).eq('id', p.uid).select('visibility').single(); ok = !error && !!data && data.visibility === value; } catch (e) {}
+  if (S.vis !== p) return;
+  p.saving = false; if (ok) p.value = value;
+  if (S.tab === 'me') renderMe();
+  toast(ok ? VIS.find(o => o[0] === value)[3] : "couldn't save · try again");
+}
 function renderMe() {
   const v = S.party ? byId(S.party.venueId) : null;
-  $('#me').innerHTML = `
+  const ae = document.activeElement, keepId = ae && ae.id && $('#me').contains(ae) ? ae.id : '';
+  loadVisibility();
+  const acct = !sb ? '' : S.user
+    ? `<div class="panel"><h2>Account</h2><p class="hi">logged in as ${esc(S.user.email || 'you')}</p><button type="button" class="btn sec" id="meOut">log out</button></div>`
+    : `<div class="panel"><h2>Account</h2><p>not logged in. log in to check in and say where you are going.</p><button type="button" class="btn" id="meIn">log in</button><button type="button" class="btn sec" id="meUp">create an account</button></div>`;
+  $('#me').innerHTML = acct + privacyPanel() + `
     <div class="panel"><h2>Team</h2>
       <p>the people behind party animals.</p>
       <button type="button" class="btn" id="meTeam">meet the team</button>
@@ -883,7 +1026,7 @@ function renderMe() {
       <button type="button" class="btn sec" id="meDir">open demo director</button>
     </div>
     <div class="panel"><h2>Your data</h2>
-      <p>${BACKEND_LOCAL ? 'in this test version everything stays on this device. nothing is sent anywhere.' : 'we store the venue and the time of a check-in, never your coordinates.'} check-ins are deleted after 2 hours.</p>
+      <p>${BACKEND_LOCAL ? 'in this test version everything stays on this device. nothing is sent anywhere.' : 'we store the venue and the time of a check-in, never your coordinates. check-ins are linked to your account only to stop fake counts, and other users can never see them.'} check-ins are deleted after 2 hours.</p>
       ${store.persistent ? '' : '<p class="hi">your browser is blocking storage, so settings reset when you close this page.</p>'}
       <button type="button" class="btn sec" id="meDel">delete my data</button>
     </div>
@@ -902,15 +1045,38 @@ function renderMe() {
   const ss = $('#swSim'); if (ss) ss.addEventListener('click', () => { S.sim = !S.sim; if (!S.sim) stopPlay(); save('sim'); renderMe(); refresh(); });
   $('#meDel').addEventListener('click', () => dialog({
     title: 'delete everything?',
-    build: b => { b.innerHTML = '<p>this clears your check-ins, party mode, 18+ confirmation and settings from this device.</p>'; },
+    build: b => { b.innerHTML = sb && S.user
+      ? '<p>this permanently deletes your account, your check-ins and your plans for tonight, then clears this device. it cannot be undone.</p>'
+      : '<p>this clears your check-ins, party mode, 18+ confirmation and settings from this device.</p>'; },
     actions: [{label: 'delete my data', kind: 'pri', onClick: wipe}, {label: 'cancel', kind: 'sec'}]
   }));
+  const mi = $('#meIn'), mu = $('#meUp'), mo = $('#meOut');
+  if (mi) mi.addEventListener('click', () => showAuth('login'));
+  if (mu) mu.addEventListener('click', () => showAuth('signup'));
+  if (mo) mo.addEventListener('click', logout);
+  const vo = $('#visOpts'), vr = $('#visRetry');
+  if (vo) vo.addEventListener('click', e => { const b = e.target.closest('[data-vis]'); if (b) setVisibility(b.dataset.vis); });
+  if (vr) vr.addEventListener('click', () => { loadVisibility(true); renderMe(); });
+  if (keepId) { const n = $('#' + keepId); if (n) n.focus(); }
   updateDemoPill();
 }
-function wipe() {
+async function wipe() {
+  if (sb && S.user) {
+    const {error} = await sb.rpc('delete_my_account');
+    if (error) { toast("couldn't delete your account · try again"); return; }
+    try { await sb.auth.signOut(); } catch (e) {}
+    S.user = null; S.vis = {uid: null};
+  }
   stopWatch(); store.clear();
-  S.age = null; S.consent = false; S.party = null; S.going = {night:'', ids:{}}; S.pings = []; S.demo = true; S.sim = false; S.selected = null; S.fake = {}; S.recaps = []; S.simH = 26; S.layer = 'live'; S.dir = false; slotKey = ''; stopPlay();
+  S.age = null; S.consent = false; S.party = null; S.going = {night:'', ids:{}}; S.pings = []; S.demo = true; S.sim = false; S.selected = null; S.fake = {}; S.recaps = []; S.simH = 26; S.layer = 'live'; S.dir = false; S.guest = false; slotKey = ''; stopPlay();
   toast('data deleted'); updateAll(); setTab('map'); showGate();
+}
+async function logout() {
+  if (S.party) endParty('stopped', true);
+  try { await sb.auth.signOut(); } catch (e) {}
+  S.user = null; S.vis = {uid: null}; S.going = {night:'', ids:{}}; save('going'); S.pings = []; save('pings');
+  S.guest = false; save('guest');
+  toast('logged out'); updateAll(); showAuth('login');
 }
 
 /* ============================================================
@@ -949,6 +1115,7 @@ function updatePartyUi() {
 function onPartyButton() {
   if (S.age !== true) { showGate(); return; }
   if (S.party) return partyStatus();
+  if (requireAuth('party mode needs an account so check-ins stay honest. nobody can see who checked in.')) return;
   if (!S.consent) return consentDialog();
   locate();
 }
@@ -959,7 +1126,7 @@ function consentDialog() {
       <li class="pt">we use your location only while party mode is on and the app is open.</li>
       <li class="pt">we match you to the nearest venue and keep only the venue and the time. never your coordinates.</li>
       <li class="pt">check-ins are deleted after 2 hours. you can stop any time.</li>
-      ${BACKEND_LOCAL ? '<li class="pt">in this test version everything stays on your device.</li>' : ''}</ul>`; },
+      ${BACKEND_LOCAL ? '<li class="pt">in this test version everything stays on your device.</li>' : '<li class="pt">check-ins are tied to your account only to stop fake counts. other users can never see who checked in.</li>'}</ul>`; },
     actions: [{label: 'turn on', kind: 'pri', onClick: () => { S.consent = true; save('consent'); locate(); }}, {label: 'not now', kind: 'sec'}]
   });
 }
@@ -1074,8 +1241,9 @@ async function tick() {
    ============================================================ */
 function showGate() {
   const g = $('#gate');
-  if (S.age === true) { g.innerHTML = ''; $('#app').inert = false; return; }
-  $('#app').inert = true;
+  if (authOpen && authMode === 'newpass') return; // a reset link must never be replaced by the 18+ screen
+  if (S.age === true) { if (authOpen) return; if (needsAuth()) { showAuth(); return; } g.innerHTML = ''; $('#app').inert = false; return; }
+  authOpen = false; $('#app').inert = true;
   if (S.age === false) {
     g.innerHTML = `<div class="gate" role="dialog" aria-modal="true" aria-labelledby="gt"><div class="in">${paw(80, 64)}<h1 id="gt">party animals is 18+</h1><p>come back when you are 18 or older.</p></div></div>`;
     return;
@@ -1086,6 +1254,405 @@ function showGate() {
   $('#ageYes').addEventListener('click', () => { S.age = true; save('age'); showGate(); if (!store.persistent) toast('your browser blocks storage, so settings will not be saved'); setTab(S.tab); });
   $('#ageNo').addEventListener('click', () => { S.age = false; save('age'); showGate(); });
   $('#ageYes').focus();
+}
+
+/* ============================================================
+   AUTH (Supabase): log in, sign up, reset password, set new password.
+   Browsing the map works without an account; check-ins and
+   "going tonight" need one so counts can't be faked.
+   ============================================================ */
+let authMode = 'login', authOpen = false;
+const needsAuth = () => !!sb && !S.user && !S.guest;
+const redirectUrl = () => /^https?:$/.test(location.protocol) ? location.origin + location.pathname : undefined;
+function requireAuth(why) {
+  if (!sb || S.user) return false;
+  dialog({title: 'log in first', build: b => { b.innerHTML = `<p>${esc(why)}</p>`; },
+    actions: [{label: 'log in', kind: 'pri', onClick: () => showAuth('login')}, {label: 'create an account', kind: 'sec', onClick: () => showAuth('signup')}, {label: 'not now', kind: 'sec'}]});
+  return true;
+}
+const authField = (id, label, type, ph, ac, max) => `<div class="field"><label for="${id}">${label}</label><div class="box"><input id="${id}" name="${id}" type="${type}" placeholder="${ph}" autocomplete="${ac}" maxlength="${max}"${type === 'email' ? ' inputmode="email" autocapitalize="off" spellcheck="false"' : ''}></div></div>`;
+const AUTH_COPY = {
+  login:   {t: 'welcome back', p: 'log in to check in and say where you are going tonight.', go: 'log in'},
+  signup:  {t: 'create your account', p: 'your name is never shown on the map. crowds only appear once 5+ people are at a venue.', go: 'create account'},
+  reset:   {t: 'reset your password', p: "enter your email and we'll send you a link to choose a new password.", go: 'send reset link'},
+  newpass: {t: 'choose a new password', p: 'pick something with 8 or more characters.', go: 'save password'}
+};
+function authMsg(e) {
+  const m = String((e && e.message) || ''), st = e && e.status;
+  if (/invalid login credentials/i.test(m)) return 'wrong email or password.';
+  if (/email not confirmed/i.test(m)) return 'confirm your email first. check your inbox (and spam).';
+  if (/already registered|already exists/i.test(m)) return 'this email already has an account. log in instead.';
+  if (/password/i.test(m) && /(weak|short|least|characters)/i.test(m)) return 'that password is too weak. use 8+ characters.';
+  if (st === 429 || /rate limit|too many/i.test(m)) return 'too many tries. wait a minute and try again.';
+  if (/fetch|network/i.test(m) || navigator.onLine === false) return 'no connection. try again.';
+  return 'something went wrong. try again.';
+}
+function showAuth(mode) {
+  if (!sb) return;
+  closeDialog(true);
+  if (mode) authMode = mode;
+  authOpen = true;
+  const g = $('#gate'), c = AUTH_COPY[authMode], m = authMode;
+  $('#app').inert = true;
+  const fields = (m === 'signup' ? authField('aName', 'name (optional)', 'text', 'what friends call you', 'nickname', 40) : '')
+    + (m !== 'newpass' ? authField('aEmail', 'email', 'email', 'you@email.com', 'email', 120) : '')
+    + (m !== 'reset' ? authField('aPass', 'password', 'password', m === 'login' ? 'your password' : '8+ characters', m === 'login' ? 'current-password' : 'new-password', 72) : '');
+  const swap = m === 'login' ? ['signup', 'create an account'] : m === 'signup' ? ['login', 'i already have an account'] : m === 'reset' ? ['login', 'back to log in'] : null;
+  g.innerHTML = `<div class="gate" role="dialog" aria-modal="true" aria-labelledby="gt"><form class="in" id="authForm" novalidate>${paw(56, 45)}
+    <div class="ah"><h1 id="gt">${esc(c.t)}</h1><p>${esc(c.p)}</p></div>
+    <div class="authf">${fields}</div>
+    <p class="err" id="aErr" role="alert" hidden></p>
+    <div class="btns"><button type="submit" class="btn" id="aGo">${esc(c.go)}</button>${swap ? `<button type="button" class="btn sec" data-mode="${swap[0]}">${esc(swap[1])}</button>` : ''}</div>
+    ${m === 'newpass' ? '' : `<div class="links">${m === 'login' ? '<button type="button" class="lnk" data-mode="reset">forgot password?</button>' : ''}<button type="button" class="lnk" id="aGuest">just look around</button></div>`}
+  </form></div>`;
+  const form = $('#authForm');
+  form.querySelectorAll('[data-mode]').forEach(b => b.addEventListener('click', () => showAuth(b.dataset.mode)));
+  const gb = $('#aGuest'); if (gb) gb.addEventListener('click', () => { S.guest = true; save('guest'); closeAuth(); });
+  form.addEventListener('submit', submitAuth);
+  const first = form.querySelector('input'); if (first) first.focus();
+}
+function closeAuth() {
+  authOpen = false; $('#gate').innerHTML = ''; $('#app').inert = false;
+  setTab(S.tab);
+}
+async function submitAuth(e) {
+  e.preventDefault();
+  const m = authMode, val = id => { const el = $('#' + id); return el ? el.value : ''; };
+  const email = val('aEmail').trim(), pass = val('aPass'), name = val('aName').trim();
+  const errEl = $('#aErr'), err = t => { errEl.textContent = t; errEl.hidden = !t; };
+  if (m !== 'newpass' && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return err('enter a valid email.');
+  if (m === 'login' && !pass) return err('enter your password.');
+  if ((m === 'signup' || m === 'newpass') && pass.length < 8) return err('your password needs 8 or more characters.');
+  const go = $('#aGo'); go.disabled = true; err('');
+  try {
+    if (m === 'login') {
+      const {error} = await sb.auth.signInWithPassword({email, password: pass}); if (error) throw error;
+      closeAuth(); toast('logged in');
+    } else if (m === 'signup') {
+      const {data, error} = await sb.auth.signUp({email, password: pass, options: {data: {display_name: name, is_adult: S.age === true}, emailRedirectTo: redirectUrl()}});
+      if (error) throw error;
+      if (data.user && Array.isArray(data.user.identities) && data.user.identities.length === 0) throw new Error('already registered');
+      if (data.session) { closeAuth(); toast('welcome to party animals'); }
+      else showCheckEmail(email);
+    } else if (m === 'reset') {
+      const {error} = await sb.auth.resetPasswordForEmail(email, {redirectTo: redirectUrl()}); if (error) throw error;
+      showAuth('login'); toast('if that email has an account, a reset link is on its way');
+    } else if (m === 'newpass') {
+      const {error} = await sb.auth.updateUser({password: pass}); if (error) throw error;
+      authMode = 'login'; closeAuth(); toast('password updated');
+    }
+  } catch (x) { err(authMsg(x)); go.disabled = false; }
+}
+function showCheckEmail(email) {
+  authOpen = true;
+  $('#gate').innerHTML = `<div class="gate" role="dialog" aria-modal="true" aria-labelledby="gt"><div class="in">${paw(56, 45)}
+    <div class="ah"><h1 id="gt">check your email</h1><p>we sent a confirmation link to <span style="color:var(--magenta)">${esc(email)}</span>. open it on this device to finish creating your account.</p></div>
+    <div class="btns"><button type="button" class="btn" id="aDone">i confirmed, log in</button><button type="button" class="btn sec" id="aResend">send the email again</button></div></div></div>`;
+  $('#aDone').addEventListener('click', () => showAuth('login'));
+  $('#aResend').addEventListener('click', async e => {
+    e.currentTarget.disabled = true;
+    const {error} = await sb.auth.resend({type: 'signup', email, options: {emailRedirectTo: redirectUrl()}});
+    toast(error ? authMsg(error) : 'sent again · check your spam folder too');
+  });
+  $('#aDone').focus();
+}
+async function initAuth() {
+  if (!sb) return;
+  sb.auth.onAuthStateChange((event, session) => {
+    S.user = session ? session.user : null;
+    // keep this callback synchronous: supabase-js warns against awaiting its own calls in here
+    setTimeout(() => {
+      if (event === 'PASSWORD_RECOVERY') { S.age = true; save('age'); showAuth('newpass'); return; } // account holders already confirmed 18+ at sign-up
+      if (event === 'SIGNED_IN' && authOpen && authMode !== 'newpass' && S.user) closeAuth();
+      if (event === 'SIGNED_OUT' && S.party) endParty('stopped', true);
+      if (S.tab === 'me') renderMe();
+      if (event === 'SIGNED_IN') flush();
+    }, 0);
+  });
+  try { const {data} = await sb.auth.getSession(); S.user = data && data.session ? data.session.user : null; } catch (e) { S.user = null; }
+}
+
+/* ============================================================
+   PROFILE (PARS-46): favorites picker, first-login onboarding, venue history (opt-in)
+   FRIENDS (PARS-47): add friends with layered identity
+   (live questions are a teammate's work: not in this block)
+   Database side: lydia-pars-46-47.sql. Everything here goes through RLS or
+   the functions find_user / get_friends.
+   ============================================================ */
+const FAV_SLOTS = [1, 2, 3];
+const P = {uid: null, loaded: false, loading: null, extras: null, favs: [], visits: [], me: null, friends: [], found: undefined, prompted: false};
+const errBox = (id, t) => { const el = $('#' + id); if (el) { el.textContent = t || ''; el.hidden = !t; } };
+const fmtNight = d => { try { return new Date(d + 'T12:00:00Z').toLocaleDateString('en-GB', {weekday: 'short', day: 'numeric', month: 'short', timeZone: 'UTC'}).toLowerCase(); } catch (e) { return d; } };
+const venueName = id => (byId(id) || {name: id}).name;
+
+/* who is logged in changed: forget the previous person's data */
+function pSync() {
+  const uid = S.user ? S.user.id : null;
+  if (P.uid !== uid) Object.assign(P, {uid, loaded: false, loading: null, extras: null, favs: [], visits: [], me: null, friends: [], found: undefined, prompted: false});
+}
+async function loadProfile() {
+  const uid = S.user.id;
+  const [ex, fv, me] = await Promise.all([
+    sb.from('profile_extras').select('onboarded,save_history').eq('user_id', uid).maybeSingle(),
+    sb.from('favorites').select('slot,kind,label').eq('user_id', uid).order('slot'),
+    sb.from('profiles').select('username,display_name,visibility').eq('id', uid).maybeSingle()
+  ]);
+  const err = ex.error || fv.error || me.error; if (err) throw err;
+  if (P.uid !== uid) return;
+  P.extras = ex.data || {onboarded: false, save_history: false};
+  P.favs = fv.data || []; P.me = me.data || {};
+  await loadVisits();
+  P.loaded = true;
+}
+async function loadVisits() {
+  P.visits = [];
+  if (!P.extras.save_history) return;
+  const {data, error} = await sb.from('visits').select('venue_id,night').eq('user_id', S.user.id).order('night', {ascending: false}).limit(30);
+  if (error) throw error;
+  P.visits = data || [];
+}
+async function ensureProfile() {
+  pSync(); if (!sb || !S.user) return false;
+  if (P.loaded) return true;
+  if (!P.loading) P.loading = loadProfile().finally(() => { P.loading = null; });
+  await P.loading; return P.loaded;
+}
+async function saveExtras(patch) {
+  const row = Object.assign({onboarded: false, save_history: false}, P.extras || {}, patch, {user_id: S.user.id});
+  const {error} = await sb.from('profile_extras').upsert(row, {onConflict: 'user_id'});
+  if (error) throw error;
+  P.extras = {onboarded: row.onboarded, save_history: row.save_history};
+}
+
+/* ---------- Me tab: favorites + venue history ---------- */
+async function renderProfile() {
+  const box = $('#me46'); if (!box) return;
+  pSync();
+  if (!sb) { box.innerHTML = ''; return; }   // local demo: profiles need the database
+  if (!S.user) { box.innerHTML = '<div class="panel"><h2>Your profile</h2><p>log in to pick your 3 favorite artists or genres and to keep a private venue history.</p></div>'; return; }
+  if (!P.loaded) {
+    box.innerHTML = '<div class="panel"><h2>Your profile</h2><div class="spin" role="img" aria-label="Loading"></div></div>';
+    try { await ensureProfile(); }
+    catch (e) {
+      box.innerHTML = '<div class="panel"><h2>Your profile</h2><p>couldn\'t load your profile.</p><button type="button" class="btn sec" id="pfRetry">try again</button></div>';
+      $('#pfRetry').addEventListener('click', renderProfile); return;
+    }
+  }
+  if (P.loaded) drawProfile();
+}
+function drawProfile() {
+  const box = $('#me46'), ex = P.extras;
+  const fav = s => P.favs.find(f => f.slot === s) || {kind: 'artist', label: ''};
+  box.innerHTML = `
+    <div class="panel"><h2>Your favorites</h2>
+      <p>${ex.onboarded ? '' : '<span style="color:var(--magenta)">new here? </span>'}pick up to 3 artists or genres. only friends who accepted your request see them, and nobody does if your profile is private.</p>
+      <form id="favForm" novalidate>
+        ${FAV_SLOTS.map(s => { const f = fav(s); return `<div class="field"><label for="fav${s}">favorite ${s}</label>
+          <div class="seg" role="group" aria-label="favorite ${s} is an artist or a genre">${['artist', 'genre'].map(k => `<button type="button" class="btn small ${f.kind === k ? '' : 'sec'}" data-slot="${s}" data-kind="${k}" aria-pressed="${f.kind === k}">${k}</button>`).join('')}</div>
+          <div class="box"><input id="fav${s}" type="text" maxlength="40" autocomplete="off" spellcheck="false" placeholder="${f.kind === 'genre' ? 'e.g. techno' : 'e.g. rosalía'}" value="${esc(f.label)}"></div></div>`; }).join('')}
+        <p class="err" id="favErr" role="alert" hidden></p>
+        <button type="submit" class="btn" id="favSave">save favorites</button>
+      </form>
+    </div>
+    <div class="panel"><h2>Venue history</h2>
+      <p>${ex.save_history ? 'on. only you can see this list. turning it off deletes it.' : 'off. nothing is kept after check-ins disappear (2 hours). turn it on to keep a private list of where you went.'}</p>
+      ${sw('swHist', 'save my venue history', ex.save_history)}
+      ${ex.save_history ? `<ul class="plist" aria-label="Your venue history">${P.visits.length
+        ? P.visits.map(v => `<li class="prow"><span class="tx"><b>${esc(venueName(v.venue_id))}</b><small>${esc(fmtNight(v.night))}</small></span></li>`).join('')
+        : '<li><p>no venues yet.</p></li>'}</ul>
+      <button type="button" class="btn sec" id="histAdd">add where i am tonight</button>` : ''}
+    </div>`;
+  $('#favForm').addEventListener('click', e => {
+    const b = e.target.closest('[data-kind]'); if (!b) return;
+    $('#favForm').querySelectorAll(`[data-slot="${b.dataset.slot}"]`).forEach(x => { const on = x === b; x.setAttribute('aria-pressed', String(on)); x.classList.toggle('sec', !on); });
+    $('#fav' + b.dataset.slot).placeholder = b.dataset.kind === 'genre' ? 'e.g. techno' : 'e.g. rosalía';
+  });
+  $('#favForm').addEventListener('submit', saveFavorites);
+  $('#swHist').addEventListener('click', () => {
+    if (!P.extras.save_history) return setHistory(true);
+    dialog({title: 'turn off venue history?', build: b => { b.innerHTML = '<p>this deletes your saved venue history. it cannot be undone.</p>'; },
+      actions: [{label: 'turn off and delete', kind: 'pri', onClick: () => setHistory(false)}, {label: 'keep it on', kind: 'sec'}]});
+  });
+  const ha = $('#histAdd'); if (ha) ha.addEventListener('click', addVisitDialog);
+}
+async function saveFavorites(e) {
+  e.preventDefault();
+  const uid = S.user.id, rows = [], empty = [];
+  for (const s of FAV_SLOTS) {
+    const label = $('#fav' + s).value.trim().replace(/\s+/g, ' ');
+    const kind = $(`#favForm [data-slot="${s}"][aria-pressed="true"]`).dataset.kind;
+    if (label.length > 40) return errBox('favErr', `favorite ${s} is too long (40 characters max).`);
+    if (label) rows.push({user_id: uid, slot: s, kind, label}); else empty.push(s);
+  }
+  errBox('favErr', ''); const btn = $('#favSave'); btn.disabled = true;
+  try {
+    if (rows.length) { const {error} = await sb.from('favorites').upsert(rows, {onConflict: 'user_id,slot'}); if (error) throw error; }
+    if (empty.length) { const {error} = await sb.from('favorites').delete().eq('user_id', uid).in('slot', empty); if (error) throw error; }
+    if (!P.extras.onboarded) await saveExtras({onboarded: true});
+    P.favs = rows.map(({slot, kind, label}) => ({slot, kind, label}));
+    toast(rows.length ? 'favorites saved' : 'favorites cleared'); drawProfile();
+  } catch (x) { btn.disabled = false; errBox('favErr', "couldn't save · try again"); }
+}
+async function setHistory(on) {
+  try { await saveExtras({save_history: on}); await loadVisits(); toast(on ? 'venue history on · only you can see it' : 'venue history off · deleted'); }
+  catch (e) { toast("couldn't save · try again"); }
+  drawProfile(); const s = $('#swHist'); if (s) s.focus();
+}
+function addVisitDialog() {
+  dialog({title: 'where are you tonight?', build: b => {
+      b.innerHTML = '<p class="dim">adds this venue to your private history for tonight.</p><div class="pick"></div>';
+      VENUES.forEach(v => { const btn = document.createElement('button'); btn.type = 'button'; btn.className = 'li';
+        btn.innerHTML = `<span class="ic">${paw(28, 22)}</span><span class="tx"><b>${esc(v.name)}</b><small>${esc(v.barrio)}</small></span>`;
+        btn.addEventListener('click', () => { closeDialog(); addVisit(v.id); }); $('.pick', b).appendChild(btn); });
+    }, actions: [{label: 'cancel', kind: 'sec'}]});
+}
+async function addVisit(id) {
+  const {error} = await sb.from('visits').insert({user_id: S.user.id, venue_id: id});
+  if (error && error.code !== '23505') { toast("couldn't save · try again"); return; }
+  toast(error ? 'already in your history tonight' : `${venueName(id)} added to your history`);
+  try { await loadVisits(); } catch (e) {}
+  drawProfile();
+}
+
+/* first login: one prompt to pick favorites ("skip" also counts as onboarded, so it never nags) */
+let onboardTries = 0;
+async function maybeOnboard() {
+  if (!sb || P.prompted) return;
+  const blocked = !S.user || S.age !== true || authOpen || dlg || $('#gate').innerHTML.trim();
+  if (blocked) { if (++onboardTries < 40) setTimeout(maybeOnboard, 1500); return; }
+  try { if (!(await ensureProfile())) return; } catch (e) { return; }
+  if (P.prompted || P.extras.onboarded || P.favs.length || dlg) return;   // already has favorites: don't ask
+  P.prompted = true;
+  dialog({title: 'welcome! pick your 3 favorites',
+    build: b => { b.innerHTML = '<p>tell your crew what you are into: 3 artists or genres. only friends who accept your request see them.</p><p class="dim">you can change them any time in the me tab.</p>'; },
+    actions: [
+      {label: 'pick my favorites', kind: 'pri', onClick: () => { setTab('me'); setTimeout(() => { const i = $('#fav1'); if (i) { i.scrollIntoView({block: 'center'}); i.focus(); } }, 400); }},
+      {label: 'skip for now', kind: 'sec', onClick: async () => { try { await saveExtras({onboarded: true}); if (S.tab === 'me') drawProfile(); } catch (e) {} }}
+    ]});
+}
+
+/* ---------- Friends tab ---------- */
+async function loadFriends() {
+  const {data, error} = await sb.rpc('get_friends'); if (error) throw error;
+  P.friends = data || [];
+}
+async function renderFriends() {
+  const box = $('#friends'); if (!box) return;
+  pSync();
+  if (!sb) { box.innerHTML = '<div class="card"><div class="row"><span class="badge">online only</span></div><h3>friends need an account</h3><p class="sub">this copy runs as a local demo, so there is nobody to add.</p></div>'; return; }
+  if (!S.user) {
+    box.innerHTML = '<div class="panel"><h2>Your crew</h2><p>log in to add friends by username. they only see your name and favorites after you accept each other.</p><button type="button" class="btn" id="frIn">log in</button><button type="button" class="btn sec" id="frUp">create an account</button></div>';
+    $('#frIn').addEventListener('click', () => showAuth('login')); $('#frUp').addEventListener('click', () => showAuth('signup')); return;
+  }
+  if (!box.innerHTML.trim() || !P.loaded) box.innerHTML = '<div class="panel"><h2>Your crew</h2><div class="spin" role="img" aria-label="Loading"></div></div>';
+  try { await ensureProfile(); await loadFriends(); }
+  catch (e) {
+    box.innerHTML = '<div class="panel"><h2>Your crew</h2><p>couldn\'t load your friends.</p><button type="button" class="btn sec" id="frRetry">try again</button></div>';
+    $('#frRetry').addEventListener('click', renderFriends); return;
+  }
+  drawFriends();
+}
+function drawFriends() {
+  const box = $('#friends'), me = P.me || {}, uname = me.username || '';
+  const inc = P.friends.filter(f => f.status === 'incoming'), crew = P.friends.filter(f => f.status === 'friends'), sent = P.friends.filter(f => f.status === 'sent');
+  const handle = f => '@' + (f.username || 'unknown');
+  const found = P.found;
+  let foundHTML = '';
+  if (found === null) foundHTML = '<p>nobody with that exact username.</p>';
+  else if (found) {
+    const rel = P.friends.find(f => f.friend_id === found.id);
+    const st = rel ? {friends: 'already friends', sent: 'request sent', incoming: 'they asked you · accept below'}[rel.status] : '';
+    foundHTML = `<div class="prow"><span class="tx"><b>@${esc(found.username)}</b><small>${st ? esc(st) : 'you\'ll see their name once you are friends'}</small></span>${rel ? '' : '<span class="acts"><button type="button" class="btn small" id="frSend">send request</button></span>'}</div>`;
+  }
+  const usernameHTML = `
+    <div class="panel"><h2>Your username</h2>
+      <p>${uname ? 'friends find you by this exact username. before they are your friends, it is all they see.' : 'pick a username so friends can find you. 3 to 24 characters: a-z, 0-9, dot or underscore.'}</p>
+      <form id="unForm" novalidate>
+        <div class="field"><label for="unIn">username</label><div class="box"><span aria-hidden="true">@</span><input id="unIn" type="text" maxlength="24" autocomplete="username" autocapitalize="off" spellcheck="false" placeholder="yourname" value="${esc(uname)}"></div></div>
+        <p class="err" id="unErr" role="alert" hidden></p>
+        <button type="submit" class="btn ${uname ? 'sec' : ''}" id="unSave">${uname ? 'change username' : 'save username'}</button>
+      </form>
+    </div>`;
+  const addHTML = `
+    <div class="panel"><h2>Add a friend</h2>
+      ${uname ? `<form id="findForm" novalidate>
+        <div class="field"><label for="findIn">their exact username</label><div class="box"><span aria-hidden="true">@</span><input id="findIn" type="search" maxlength="25" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="username"></div></div>
+        <button type="submit" class="btn" id="findGo">find</button>
+      </form>
+      <div id="foundBox" aria-live="polite">${foundHTML}</div>` : '<p>save a username first, so people know who is asking.</p>'}
+    </div>`;
+  // order: requests waiting for you first, then your crew; a new user starts with the username
+  box.innerHTML = (uname ? '' : usernameHTML) + `
+    ${inc.length ? `<div class="panel"><h2>Requests</h2><ul class="plist">${inc.map(f => `<li class="prow"><span class="tx"><b>${esc(handle(f))}</b><small>wants to be friends</small></span><span class="acts"><button type="button" class="btn small" data-acc="${f.friend_id}" aria-label="Accept ${esc(handle(f))}">accept</button><button type="button" class="btn small sec" data-dec="${f.friend_id}" aria-label="Decline ${esc(handle(f))}">decline</button></span></li>`).join('')}</ul></div>` : ''}
+    <div class="panel"><h2>Your crew</h2>
+      ${crew.length || sent.length ? `<ul class="plist">
+        ${crew.map(f => { const priv = f.display_name == null && f.favorites == null;
+          return `<li class="prow"><span class="tx"><b>${esc(f.display_name || handle(f))}</b><small>${esc(handle(f))}${priv ? ' · private profile' : ''}</small>${f.favorites && f.favorites.length ? `<span class="chips">${f.favorites.map(x => `<span class="chip"><i>${esc(x.kind)}</i>${esc(x.label)}</span>`).join('')}</span>` : ''}</span><span class="acts"><button type="button" class="btn small sec" data-rm="${f.friend_id}" aria-label="Remove ${esc(handle(f))}">remove</button></span></li>`; }).join('')}
+        ${sent.map(f => `<li class="prow"><span class="tx"><b>${esc(handle(f))}</b><small>request sent</small></span><span class="acts"><button type="button" class="btn small sec" data-rm="${f.friend_id}" aria-label="Cancel request to ${esc(handle(f))}">cancel</button></span></li>`).join('')}
+      </ul>` : '<p>no friends yet. add someone by their username.</p>'}
+    </div>` + addHTML + (uname ? usernameHTML : '');
+  $('#unForm').addEventListener('submit', saveUsername);
+  const ff = $('#findForm'); if (ff) ff.addEventListener('submit', findFriend);
+  const fs = $('#frSend'); if (fs) fs.addEventListener('click', () => sendRequest(found));
+  box.querySelectorAll('[data-acc]').forEach(b => b.addEventListener('click', () => answerRequest(b.dataset.acc, 'accepted')));
+  box.querySelectorAll('[data-dec]').forEach(b => b.addEventListener('click', () => answerRequest(b.dataset.dec, 'declined')));
+  box.querySelectorAll('[data-rm]').forEach(b => b.addEventListener('click', () => {
+    const f = P.friends.find(x => x.friend_id === b.dataset.rm); if (!f) return;
+    if (f.status !== 'friends') return removeFriend(f.friend_id);   // cancelling a sent request needs no confirm
+    dialog({title: `remove ${handle(f)}?`, build: d => { d.innerHTML = '<p>you stop seeing each other\'s name and favorites. you can add them again later.</p>'; },
+      actions: [{label: 'remove', kind: 'pri', onClick: () => removeFriend(f.friend_id)}, {label: 'cancel', kind: 'sec'}]});
+  }));
+}
+async function saveUsername(e) {
+  e.preventDefault();
+  const u = $('#unIn').value.trim().replace(/^@/, '').toLowerCase();
+  if (!/^[a-z0-9_.]{3,24}$/.test(u)) return errBox('unErr', '3 to 24 characters: a-z, 0-9, dot or underscore.');
+  if (u === (P.me.username || '')) return errBox('unErr', '');
+  $('#unSave').disabled = true;
+  const {error} = await sb.from('profiles').update({username: u}).eq('id', S.user.id);
+  if (error) { $('#unSave').disabled = false; return errBox('unErr', error.code === '23505' ? 'that username is taken.' : "couldn't save · try again"); }
+  P.me.username = u; toast('username saved · @' + u); drawFriends();
+}
+async function findFriend(e) {
+  e.preventDefault();
+  const q = $('#findIn').value.trim(); if (!q) return;
+  $('#findGo').disabled = true;
+  const {data, error} = await sb.rpc('find_user', {handle: q});
+  if (error) { $('#findGo').disabled = false; toast("couldn't search · try again"); return; }
+  P.found = (data && data[0]) || null; drawFriends();
+  const i = $('#findIn'); if (i) i.value = q;
+}
+async function sendRequest(u) {
+  if (!u) return;
+  const {error} = await sb.from('friendships').insert({requester: S.user.id, addressee: u.id});
+  if (error && error.code !== '23505') { toast("couldn't send · try again"); return; }
+  toast('request sent to @' + u.username); P.found = undefined; renderFriends();
+}
+async function answerRequest(id, status) {
+  const {error} = await sb.from('friendships').update({status}).eq('requester', id).eq('addressee', S.user.id);
+  if (error) { toast("couldn't save · try again"); return; }
+  toast(status === 'accepted' ? "you're friends now" : 'request declined'); renderFriends();
+}
+async function removeFriend(id) {
+  const me = S.user.id;
+  const a = await sb.from('friendships').delete().eq('requester', me).eq('addressee', id);
+  const b = await sb.from('friendships').delete().eq('requester', id).eq('addressee', me);
+  if (a.error || b.error) { toast("couldn't remove · try again"); return; }
+  toast('removed'); P.found = undefined; renderFriends();
+}
+
+/* re-render when someone logs in or out (a second listener, so initAuth stays as it was) */
+if (sb) {
+  let lastUid;
+  sb.auth.onAuthStateChange((event, session) => {
+    const uid = session ? session.user.id : null;
+    setTimeout(() => {
+      if (uid === lastUid) return; lastUid = uid;
+      if (S.tab === 'me') renderProfile();
+      if (S.tab === 'friends') renderFriends();
+      if (uid) { onboardTries = 0; maybeOnboard(); }
+    }, 0);
+  });
 }
 
 /* ============================================================
@@ -1119,7 +1686,8 @@ try {
   if (S.party) { if (Date.now() > S.party.expiresAt) { S.party = null; save('party'); } else startWatch(); }
   S.pings = S.pings.filter(p => p.ts >= Date.now() - PING_TTL_MIN * 60000); save('pings');
   $('#offline').hidden = S.online;
-  showGate(); refresh(); flush();
+  if (sb) $('#app').inert = true; // wait for the saved session before deciding whether to show the login screen
+  initAuth().then(() => { showGate(); refresh(); flush(); });
 } catch (e) {
   document.body.insertAdjacentHTML('beforeend', '<div style="position:fixed;inset:0;background:#000;color:#DF40C6;padding:24px;z-index:999;font-weight:800">something broke while starting. <button style="margin-top:16px;display:block;height:52px;padding:0 28px;border-radius:999px;border:2px solid #DF40C6;background:#DF40C6;color:#000;font-weight:800" onclick="location.reload()">reload</button></div>');
 }
