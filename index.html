@@ -245,6 +245,78 @@ h1,h2,h3,p{margin:0}
 .chip{display:inline-flex;align-items:center;min-height:28px;padding:4px 12px;border-radius:999px;border:1px solid var(--purple);color:var(--magenta);font-size:11px;font-weight:800;overflow-wrap:anywhere}
 .chip i{font-style:normal;color:var(--purple);font-weight:400;margin-right:6px}
 .panel .err,.dlg .err{font-size:12px;line-height:1.5;color:var(--yellow);font-weight:800}
+/* ============================================================
+   DESKTOP (>= 900px): same app, wider layout.
+   Nav becomes a left rail, venue card becomes a side card,
+   lists and settings use the extra width. Phones are untouched.
+   ============================================================ */
+@media (min-width:900px){
+  :root{--rail:120px}
+  #app{max-width:none}
+  .hdr{padding:0 28px 0 24px}
+  .brand b{font-size:18px}
+
+  /* nav rail */
+  .nav{left:16px;top:calc(50% + 28px);bottom:auto;transform:translateY(-50%);width:88px;height:auto;padding:16px 0;
+    flex-direction:column;justify-content:center;gap:12px;border-radius:44px}
+  .nav button{flex:none;width:64px;max-width:64px;height:64px}
+  .nav .party{width:64px;max-width:64px;height:64px}
+
+  /* screens sit to the right of the rail */
+  .screen{left:var(--rail);
+    padding:88px max(40px,calc((100% - var(--rail) - 960px)/2)) 48px}
+  #screen-map{padding:0}
+  #vlist{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  #me{display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start}
+  #me .panel{margin-bottom:0}
+  .panel .btn{align-self:flex-start}
+  .tlist{max-width:560px;padding-bottom:48px}
+
+  /* map overlays */
+  .cap,.ctls{top:72px}
+  .layer{top:116px}
+  .ctls{right:20px}
+  .cap,.layer{left:20px}
+  .slot{left:16px;right:auto;bottom:16px;width:min(420px,calc(100% - 32px))}
+  .offline{top:72px}
+  .tmsg{left:calc(var(--rail) + 24px);right:auto;bottom:24px;width:min(520px,calc(100% - var(--rail) - 48px))}
+  .map{cursor:grab}
+
+  /* split view: venue list is a persistent left panel next to a large map */
+  .nav [data-tab="venues"]{display:none}
+  body[data-tab="map"] #screen-venues[hidden]{display:block!important}
+  body[data-tab="map"] #screen-venues{right:auto;width:400px;padding:76px 20px 24px;border-right:1px solid var(--line)}
+  body[data-tab="map"] #vlist{display:flex;flex-direction:column;gap:10px}
+  body[data-tab="map"] #screen-venues h1{display:none}
+  #screen-map{left:calc(var(--rail) + 400px)}
+  body:not([data-tab="map"]) #screen-map{left:var(--rail)}
+  .slot{width:min(400px,calc(100% - 32px))}
+
+  /* dialogs centered instead of bottom sheets */
+  .scrim{align-items:center}
+  .toast{top:72px}
+}
+
+/* hover states, only for devices that can hover (flat color swaps, brand colors only) */
+@media (hover:hover){
+  .btn:hover,.tbtn:hover{border-color:var(--purple);background:var(--purple)}
+  .btn.sec:hover,.btn.dark:hover{border-color:var(--purple);color:var(--purple);background:#000}
+  .btn:disabled:hover{border-color:var(--magenta);background:var(--magenta)}
+  .btn.sec:disabled:hover{border-color:var(--magenta);color:var(--magenta);background:#000}
+  .li:not([aria-current="true"]):not(:disabled):hover{border-color:var(--purple)}
+  .nav button:not([aria-current="page"]):hover{box-shadow:inset 0 0 0 2px var(--purple)}
+  .ctls button:hover{border-color:var(--purple);color:var(--purple)}
+  .layer button[aria-pressed="false"]:hover{border-color:var(--magenta);color:var(--magenta)}
+  .pill:hover,.back:hover{border-color:var(--magenta);color:var(--magenta)}
+  .mk:hover i{border-color:var(--magenta)}
+  .dir .chips button:hover{border-color:var(--magenta);color:var(--magenta)}
+}
+/* desktop (>= 900px) for the profile + friends sections (PARS-46/47): two columns like #me */
+@media (min-width:900px){
+  #me46,#friends{display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start}
+  #me46{margin-bottom:16px}
+  #me46 .panel,#friends .panel{margin-bottom:0}
+}
 @media (prefers-reduced-motion:reduce){
   *,*::before,*::after{animation:none!important;transition:none!important}
 }
@@ -620,7 +692,7 @@ $('#nav').addEventListener('click', e => { const b = e.target.closest('[data-tab
 $('#partyBtn').addEventListener('click', onPartyButton);
 
 function setTab(t) {
-  S.tab = t;
+  S.tab = t; document.body.dataset.tab = t;
   ['map','venues','friends','me','team'].forEach(id => { $('#screen-' + id).hidden = id !== t; });
   const cur = t === 'team' ? 'me' : t;
   document.querySelectorAll('#nav [data-tab]').forEach(b => {
@@ -632,7 +704,7 @@ function setTab(t) {
   if (t === 'me') renderProfile();         // PARS-46
   if (t === 'friends') renderFriends();    // PARS-47
   if (t === 'team') { S.teamSel = null; renderTeam(); } else $('#tmsg').hidden = true;
-  if (t === 'venues') renderList(true);
+  if (t === 'venues' || t === 'map') renderList(true);
   const sc = $('#screen-' + t); if (sc && t !== 'map') sc.scrollTop = 0;
 }
 
@@ -724,9 +796,10 @@ function clampView() {
   view.tx = clamp(view.tx, 80 - WW * view.s, r.width - 80);
   view.ty = clamp(view.ty, 80 - WH * view.s, r.height - 80);
 }
+const DESK = window.matchMedia('(min-width: 900px)');
 function sizeMap(keep) {
   const r = mapEl.getBoundingClientRect(); if (!r.width || !r.height) return;
-  const availH = r.height - 64 - 160, s0 = Math.min((r.width - 64) / WW, Math.max(availH, 200) / WH);
+  const availH = r.height - 64 - (DESK.matches ? 24 : 160), s0 = Math.min((r.width - 64) / WW, Math.max(availH, 200) / WH);
   const ratio = keep ? view.s / view.s0 : 1; view.s0 = s0;
   if (!keep) { view.s = s0; view.tx = (r.width - 64 - WW * s0) / 2; view.ty = 64 + (Math.max(availH, 200) - WH * s0) / 2; }
   else { view.s = clamp(s0 * ratio, s0 * 0.8, s0 * 6); clampView(); }
@@ -739,7 +812,9 @@ function zoomAt(f, cx, cy, anim) {
 function focusOn(v, anim = true) {
   const r = mapEl.getBoundingClientRect(), p = proj(v.lat, v.lng);
   view.s = Math.max(view.s, view.s0 * 2.6);
-  view.tx = r.width / 2 - p.x * view.s; view.ty = r.height * 0.34 - p.y * view.s; clampView(); applyView(anim);
+  // desktop: the venue card sits at the left (about 436px), so centre in the free area to its right
+  const fx = DESK.matches ? 436 + (r.width - 436) / 2 : r.width / 2, fy = DESK.matches ? r.height * 0.5 : r.height * 0.34;
+  view.tx = fx - p.x * view.s; view.ty = fy - p.y * view.s; clampView(); applyView(anim);
 }
 $('#zin').addEventListener('click', () => { const r = mapEl.getBoundingClientRect(); zoomAt(1.5, r.width / 2, r.height / 2, true); });
 $('#zout').addEventListener('click', () => { const r = mapEl.getBoundingClientRect(); zoomAt(1 / 1.5, r.width / 2, r.height / 2, true); });
@@ -778,6 +853,21 @@ mapEl.addEventListener('click', e => {
   if (b) { selectVenue(b.dataset.id, false); return; }
   if (!e.target.closest('.ctls, .layer') && S.selected) selectVenue(null);
 });
+// desktop keyboard shortcuts for the map: arrows pan, + / - zoom, 0 shows all, Esc closes the venue card
+document.addEventListener('keydown', e => {
+  if (!DESK.matches || S.tab !== 'map' || dlg || e.ctrlKey || e.metaKey || e.altKey) return;
+  const t = e.target; if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA')) return;
+  if ($('#gate').children.length) return;
+  const r = mapEl.getBoundingClientRect(), k = e.key;
+  if (k === '+' || k === '=') zoomAt(1.5, r.width / 2, r.height / 2, true);
+  else if (k === '-' || k === '_') zoomAt(1 / 1.5, r.width / 2, r.height / 2, true);
+  else if (k === '0') $('#zfit').click();
+  else if (k === 'ArrowLeft' || k === 'ArrowRight' || k === 'ArrowUp' || k === 'ArrowDown') {
+    e.preventDefault();
+    view.tx += k === 'ArrowLeft' ? 90 : k === 'ArrowRight' ? -90 : 0; view.ty += k === 'ArrowUp' ? 90 : k === 'ArrowDown' ? -90 : 0;
+    clampView(); applyView(true);
+  } else if (k === 'Escape' && S.selected) selectVenue(null);
+});
 if ('ResizeObserver' in window) new ResizeObserver(() => { if (S.tab === 'map') sizeMap(true); }).observe(mapEl);
 else window.addEventListener('resize', () => sizeMap(true));
 
@@ -791,6 +881,7 @@ function selectVenue(id, center = true) {
     if (center || sy > r.height - 340 || sy < 110 || sx < 30 || sx > r.width - 30) focusOn(v);
   }
   scheduleLayout(); renderSlot(); renderList(false);
+  if (DESK.matches && id) { const cur = $('#vlist [aria-current="true"]'); if (cur) cur.scrollIntoView({block:'nearest'}); }
 }
 
 function updateMap() {
@@ -859,7 +950,7 @@ function renderSlot() {
 function emptyState() {
   if (!S.crowd.size) return null;
   const now = madrid(), live = VENUES.map(status), goingAny = VENUES.some(v => levelOf((S.crowd.get(v.id) || {going: 0}).going));
-  if (S.layer === 'going') return goingAny ? null : {k:'g0', text: 'nobody has said they are going yet. tap "going tonight" on a venue to be the first.'};
+  if (S.layer === 'going') return goingAny ? null : {k:'g0', text: 'nobody has said they are going yet. press "going tonight" on a venue to be the first.'};
   if (live.some(x => x.level)) return null;
   const allClosed = live.every(x => x.key === 'c');
   if (allClosed && !S.sim) return {k:'closed', text: `it's ${now.label} in madrid and venues are closed. preview a saturday night to see the map in action?`, btn:'preview saturday night', act: () => { S.sim = true; save('sim'); refresh(); toast('previewing saturday night'); }};
@@ -913,13 +1004,13 @@ function updateDirector() {
   const v = S.selected ? byId(S.selected) : null, add = $('#dirAdd'), st = $('#dirS');
   add.disabled = !v;
   if (v) { const s2 = status(v), c = s2.c; st.textContent = `${v.name}: ${s2.label} · ` + (!c.open ? 'closed' : c.count >= N ? c.count + ' here' : c.count + ' of ' + N + ' needed to show a crowd') + ' (director view)'; }
-  else st.textContent = 'tap a venue, then add people to see the 5-person rule.';
+  else st.textContent = 'select a venue, then add people to see the 5-person rule.';
 }
 
 /* ---------- morning recap ---------- */
 function recapDialog() {
   dialog({title: 'did the map change where you went last night?',
-    build: b => { b.innerHTML = '<p class="dim">one tap. it helps us learn whether live crowd info is actually useful.</p>'; },
+    build: b => { b.innerHTML = '<p class="dim">one press. it helps us learn whether live crowd info is actually useful.</p>'; },
     actions: [['yes', 'yes, it did'], ['no', "no, i'd have gone anyway"], ['unsure', 'not sure']].map(([k, label]) => ({label, kind: 'pri', onClick: () => { S.recaps.push({ts: Date.now(), a: k}); save('recaps'); toast('thanks · noted'); if (S.tab === 'me') renderMe(); }})).concat([{label: 'skip', kind: 'sec'}])});
 }
 async function toggleGoing(id) {
@@ -1156,7 +1247,7 @@ function geoError(err) {
   const T = {
     1: ['location is off', 'party mode needs your location to find your venue. allow it for this site in your browser or phone settings, then try again.' + (inFrame ? ' if you opened this inside a preview, location can be blocked there. open the page directly.' : '')],
     2: ['no location signal', 'we cannot get a fix. step outside or near a window and try again.'],
-    3: ['taking too long', 'your phone has not found you yet. try again, or pick your venue yourself.'],
+    3: ['taking too long', 'your device has not found you yet. try again, or pick your venue yourself.'],
     0: ['location not available', 'this device or browser does not support location. you can still pick your venue yourself.']
   }[code] || ['location problem', 'something went wrong getting your location. try again, or pick your venue yourself.'];
   dialog({title: T[0], build: b => { b.innerHTML = `<p>${esc(T[1])}</p><p class="dim">picking a venue yourself counts a little less and lasts 1 hour.</p>`; },
