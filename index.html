@@ -290,7 +290,7 @@ h1,h2,h3,p{margin:0}
   html.desk .toast{left:auto;right:24px;bottom:24px;transform:none}
 
 html:not(.desk) #app{border-left:1px solid var(--line);border-right:1px solid var(--line)}
-@media (max-width:699px){html:not(.desk) #viewPill{display:none}}
+html:not(.desk) #viewPill{display:none}
 .hdr .right{display:flex;align-items:center;gap:8px;min-width:0}
 
 /* hover states, only for devices that can hover (flat color swaps, brand colors only) */
@@ -1131,9 +1131,14 @@ function renderMe() {
       <p>${S.recaps.length ? `${S.recaps.filter(r => r.a === 'yes').length} of ${S.recaps.length} answers said the map changed where they went.` : 'no recap answers yet.'}</p>
       <button type="button" class="btn sec" id="meRecap">answer a recap</button>
     </div>
+    ${(window.innerWidth >= 700 || DESK.matches) ? `<div class="panel"><h2>Layout</h2>
+      <p>${DESK.matches ? 'desktop layout: list beside a large map.' : 'mobile layout: one phone-width column.'}</p>
+      <button type="button" class="btn sec" id="meView">${DESK.matches ? 'switch to mobile layout' : 'switch to desktop layout'}</button>
+    </div>` : ''}
     <div class="panel"><h2>About</h2>
       <p>party animals · mvp 0.1 · madrid · 18+ only. venue details are placeholders until verified on site.</p>
     </div>`;
+  const mv = $('#meView'); if (mv) mv.addEventListener('click', () => { store.set('view', DESK.matches ? 'mobile' : 'desktop'); applyViewMode(true); });
   $('#meParty').addEventListener('click', () => { if (S.party) endParty('stopped', true); else onPartyButton(); });
   $('#swDemo').addEventListener('click', () => { S.demo = !S.demo; save('demo'); renderMe(); refresh(); });
   $('#meDir').addEventListener('click', openDirector);
