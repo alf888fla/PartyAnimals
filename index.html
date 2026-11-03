@@ -250,52 +250,48 @@ h1,h2,h3,p{margin:0}
    Nav becomes a left rail, venue card becomes a side card,
    lists and settings use the extra width. Phones are untouched.
    ============================================================ */
-@media (min-width:900px){
-  :root{--rail:120px}
-  #app{max-width:none}
-  .hdr{padding:0 28px 0 24px}
-  .brand b{font-size:18px}
-
+/* DESKTOP layout: applied when html has class .desk (auto at >=900px wide, or chosen with the header switch) */
+  html.desk{--rail:120px}
+  html.desk #app{max-width:none}
+  html.desk .hdr{padding:0 28px 0 24px}
+  html.desk .brand b{font-size:18px}
   /* nav rail */
-  .nav{left:16px;top:calc(50% + 28px);bottom:auto;transform:translateY(-50%);width:88px;height:auto;padding:16px 0;
+  html.desk .nav{left:16px;top:calc(50% + 28px);bottom:auto;transform:translateY(-50%);width:88px;height:auto;padding:16px 0;
     flex-direction:column;justify-content:center;gap:12px;border-radius:44px}
-  .nav button{flex:none;width:64px;max-width:64px;height:64px}
-  .nav .party{width:64px;max-width:64px;height:64px}
-
+  html.desk .nav button{flex:none;width:64px;max-width:64px;height:64px}
+  html.desk .nav .party{width:64px;max-width:64px;height:64px}
   /* screens sit to the right of the rail */
-  .screen{left:var(--rail);
+  html.desk .screen{left:var(--rail);
     padding:88px max(40px,calc((100% - var(--rail) - 960px)/2)) 48px}
-  #screen-map{padding:0}
-  #vlist{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-  #me{display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start}
-  #me .panel{margin-bottom:0}
-  .panel .btn{align-self:flex-start}
-  .tlist{max-width:560px;padding-bottom:48px}
-
+  html.desk #screen-map{padding:0}
+  html.desk #vlist{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  html.desk #me{display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start}
+  html.desk #me .panel{margin-bottom:0}
+  html.desk .panel .btn{align-self:flex-start}
+  html.desk .tlist{max-width:560px;padding-bottom:48px}
   /* map overlays */
-  .cap,.ctls{top:72px}
-  .layer{top:116px}
-  .ctls{right:20px}
-  .cap,.layer{left:20px}
-  .slot{left:16px;right:auto;bottom:16px;width:min(420px,calc(100% - 32px))}
-  .offline{top:72px}
-  .tmsg{left:calc(var(--rail) + 24px);right:auto;bottom:24px;width:min(520px,calc(100% - var(--rail) - 48px))}
-  .map{cursor:grab}
-
+  html.desk .ctls{right:20px}
+  html.desk .cap,html.desk .layer,html.desk .legend{left:20px}
+  html.desk .slot{left:16px;right:auto;bottom:16px;width:min(420px,calc(100% - 32px))}
+  html.desk .offline{left:20px}
+  html.desk .tmsg{left:calc(var(--rail) + 24px);right:auto;bottom:24px;width:min(520px,calc(100% - var(--rail) - 48px))}
+  html.desk .map{cursor:grab}
   /* split view: venue list is a persistent left panel next to a large map */
-  .nav [data-tab="venues"]{display:none}
-  body[data-tab="map"] #screen-venues[hidden]{display:block!important}
-  body[data-tab="map"] #screen-venues{right:auto;width:400px;padding:76px 20px 24px;border-right:1px solid var(--line)}
-  body[data-tab="map"] #vlist{display:flex;flex-direction:column;gap:10px}
-  body[data-tab="map"] #screen-venues h1{display:none}
-  #screen-map{left:calc(var(--rail) + 400px)}
-  body:not([data-tab="map"]) #screen-map{left:var(--rail)}
-  .slot{width:min(400px,calc(100% - 32px))}
-
+  html.desk .nav [data-tab="venues"]{display:none}
+  html.desk body[data-tab="map"] #screen-venues[hidden]{display:block!important}
+  html.desk body[data-tab="map"] #screen-venues{right:auto;width:400px;padding:76px 20px 24px;border-right:1px solid var(--line)}
+  html.desk body[data-tab="map"] #vlist{display:flex;flex-direction:column;gap:10px}
+  html.desk body[data-tab="map"] #screen-venues h1{display:none}
+  html.desk #screen-map{left:calc(var(--rail) + 400px)}
+  html.desk body:not([data-tab="map"]) #screen-map{left:var(--rail)}
+  html.desk .slot{width:min(400px,calc(100% - 32px))}
   /* dialogs centered instead of bottom sheets */
-  .scrim{align-items:center}
-  .toast{top:72px}
-}
+  html.desk .scrim{align-items:center}
+  html.desk .toast{left:auto;right:24px;bottom:24px;transform:none}
+
+html:not(.desk) #app{border-left:1px solid var(--line);border-right:1px solid var(--line)}
+@media (max-width:699px){html:not(.desk) #viewPill{display:none}}
+.hdr .right{display:flex;align-items:center;gap:8px;min-width:0}
 
 /* hover states, only for devices that can hover (flat color swaps, brand colors only) */
 @media (hover:hover){
@@ -311,12 +307,10 @@ h1,h2,h3,p{margin:0}
   .mk:hover i{border-color:var(--magenta)}
   .dir .chips button:hover{border-color:var(--magenta);color:var(--magenta)}
 }
-/* desktop (>= 900px) for the profile + friends sections (PARS-46/47): two columns like #me */
-@media (min-width:900px){
-  #me46,#friends{display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start}
-  #me46{margin-bottom:16px}
-  #me46 .panel,#friends .panel{margin-bottom:0}
-}
+/* desktop view for the profile + friends sections (PARS-46/47): two columns like #me */
+html.desk #me46,html.desk #friends{display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start}
+html.desk #me46{margin-bottom:16px}
+html.desk #me46 .panel,html.desk #friends .panel{margin-bottom:0}
 @media (prefers-reduced-motion:reduce){
   *,*::before,*::after{animation:none!important;transition:none!important}
 }
@@ -328,7 +322,7 @@ h1,h2,h3,p{margin:0}
 <div id="app" aria-live="off">
   <header class="hdr">
     <div class="brand" id="brand"></div>
-    <button type="button" class="pill" id="demoPill" hidden></button>
+    <div class="right"><button type="button" class="pill mag" id="viewPill"></button><button type="button" class="pill" id="demoPill" hidden></button></div>
   </header>
 
   <section class="screen" id="screen-map" aria-label="Map">
@@ -387,7 +381,7 @@ h1,h2,h3,p{margin:0}
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 <div id="gate"></div>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
 <script>
 (() => {
 'use strict';
@@ -500,6 +494,18 @@ const store = (() => {
     clear() { try { if (persistent) Object.keys(localStorage).filter(k => k.startsWith('pa:')).forEach(k => localStorage.removeItem(k)); } catch (e) {} Object.keys(mem).forEach(k => delete mem[k]); }
   };
 })();
+const VIEWMQ = window.matchMedia('(min-width: 900px)');
+const DESK = {get matches() { const m = store.get('view', 'auto'); return m === 'desktop' || (m === 'auto' && VIEWMQ.matches); }};
+function applyViewMode(fit) {
+  const d = DESK.matches, m = store.get('view', 'auto');
+  document.documentElement.classList.toggle('desk', d);
+  const vp = $('#viewPill'); vp.textContent = d ? 'mobile view' : 'desktop view';
+  vp.setAttribute('aria-label', 'Switch to ' + (d ? 'mobile' : 'desktop') + ' layout' + (m === 'auto' ? ' (now automatic)' : ''));
+  if (fit) { setTab(S.tab); }
+}
+$('#viewPill').addEventListener('click', () => { store.set('view', DESK.matches ? 'mobile' : 'desktop'); applyViewMode(true); });
+VIEWMQ.addEventListener('change', () => applyViewMode(true));
+applyViewMode(false);
 
 /* ============================================================
    STATE
@@ -637,7 +643,7 @@ const ICONS = {
    ============================================================ */
 let toastT;
 function placeToast() {
-  const sl = $('#slot'), extra = (S.tab === 'map' && sl && sl.offsetHeight) ? sl.offsetHeight + 12 : 0;
+  const sl = $('#slot'), extra = (!DESK.matches && S.tab === 'map' && sl && sl.offsetHeight) ? sl.offsetHeight + 12 : 0;
   $('#toast').style.bottom = `calc(var(--nav-h) + 28px + ${extra}px + env(safe-area-inset-bottom,0px))`;
 }
 function toast(msg) {
@@ -796,7 +802,7 @@ function clampView() {
   view.tx = clamp(view.tx, 80 - WW * view.s, r.width - 80);
   view.ty = clamp(view.ty, 80 - WH * view.s, r.height - 80);
 }
-const DESK = window.matchMedia('(min-width: 900px)');
+
 function sizeMap(keep) {
   const r = mapEl.getBoundingClientRect(); if (!r.width || !r.height) return;
   const availH = r.height - 64 - (DESK.matches ? 24 : 160), s0 = Math.min((r.width - 64) / WW, Math.max(availH, 200) / WH);
@@ -1332,7 +1338,6 @@ async function tick() {
    ============================================================ */
 function showGate() {
   const g = $('#gate');
-  if (authOpen && authMode === 'newpass') return; // a reset link must never be replaced by the 18+ screen
   if (S.age === true) { if (authOpen) return; if (needsAuth()) { showAuth(); return; } g.innerHTML = ''; $('#app').inert = false; return; }
   authOpen = false; $('#app').inert = true;
   if (S.age === false) {
@@ -1453,7 +1458,7 @@ async function initAuth() {
     S.user = session ? session.user : null;
     // keep this callback synchronous: supabase-js warns against awaiting its own calls in here
     setTimeout(() => {
-      if (event === 'PASSWORD_RECOVERY') { S.age = true; save('age'); showAuth('newpass'); return; } // account holders already confirmed 18+ at sign-up
+      if (event === 'PASSWORD_RECOVERY') { showAuth('newpass'); return; }
       if (event === 'SIGNED_IN' && authOpen && authMode !== 'newpass' && S.user) closeAuth();
       if (event === 'SIGNED_OUT' && S.party) endParty('stopped', true);
       if (S.tab === 'me') renderMe();
