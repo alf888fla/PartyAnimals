@@ -1288,14 +1288,15 @@ function handlePosition(pos) {
 function pickManual() {
   dialog({title: 'pick your venue', build: b => {
       b.innerHTML = '<p class="dim">only pick where you are right now. manual check-ins count less.</p><div class="pick"></div>';
-      VENUES.forEach(v => { const c = S.crowd.get(v.id), closed = c && !c.open; const btn = document.createElement('button'); btn.type = 'button'; btn.className = 'li'; btn.disabled = !!closed;
-        btn.innerHTML = `<span class="ic">${paw(28, 22)}</span><span class="tx"><b>${esc(v.name)}</b><small>${esc(v.barrio)}${closed ? ' · closed' : ''}</small></span>`;
+      VENUES.forEach(v => { const c = S.crowd.get(v.id), closed = c && !c.open; const btn = document.createElement('button'); btn.type = 'button'; btn.className = 'li'; if (closed) btn.style.opacity = '.6'; /* never disable: tapping a closed venue explains why and offers a preview */
+        btn.innerHTML = `<span class="ic">${paw(28, 22)}</span><span class="tx"><b>${esc(v.name)}</b><small>${esc(v.barrio)}${closed ? ' · closed right now' : ''}</small></span>`;
         btn.addEventListener('click', () => { closeDialog(); beginParty(v.id, 'manual'); }); $('.pick', b).appendChild(btn); });
     }, actions: [{label: 'cancel', kind: 'sec'}]});
 }
 function beginParty(id, source) {
   const v = byId(id), c = S.crowd.get(id);
-  if (c && !c.open) return dialog({title: `${v.name} is closed`, build: b => { b.innerHTML = `<p>typical opening is around ${fmtH(v.hours[0])}. check back then.</p>`; }, actions: [{label: 'ok', kind: 'pri'}]});
+  if (c && !c.open) return dialog({title: `${v.name} is closed`, build: b => { b.innerHTML = `<p>typical opening is around ${fmtH(v.hours[0])}. check back then.</p><p class="dim">testing the app? preview a saturday night and check in as if venues were open.</p>`; },
+    actions: [{label: 'preview saturday night', kind: 'pri', onClick: async () => { S.sim = true; save('sim'); await refresh(); toast('previewing saturday night'); beginParty(id, source); }}, {label: 'ok', kind: 'sec'}]});
   const t = Date.now();
   S.party = {venueId: id, startedAt: t, lastPing: t, source, misses: 0, errs: 0, expiresAt: t + (source === 'manual' ? MANUAL_PARTY_MS : MAX_PARTY_MS)};
   save('party'); recordPing(id, source); startWatch(); updatePartyUi();
